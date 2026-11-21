@@ -10,7 +10,7 @@ const FROM = Deno.env.get("FROM_EMAIL") ?? "Vacances Muslims <inscription@paceap
 const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
 const cors = {
-  "Access-Control-Allow-Origin": SITE_URL || "*",
+  "Access-Control-Allow-Origin": SITE_URL ? new URL(SITE_URL).origin : "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "content-type",
   "Vary": "Origin",
