@@ -4,13 +4,13 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY")!;
-const SITE_URL = (Deno.env.get("SITE_URL") ?? "").replace(/\/$/, "");
+const SITE_URL = (Deno.env.get("SITE_URL") || "https://vacancesmuslims.fr").replace(/\/$/, "");
 const FROM = Deno.env.get("FROM_EMAIL") ?? "Vacances Muslims <inscription@vacancesmuslims.fr>";
 
 const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
 const cors = {
-  "Access-Control-Allow-Origin": SITE_URL ? new URL(SITE_URL).origin : "*",
+  "Access-Control-Allow-Origin": new URL(SITE_URL).origin,
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "content-type",
   "Vary": "Origin",
@@ -23,6 +23,18 @@ const esc = (s: string) =>
 
 const PROFILS = ["voyageur", "proprietaire", "les_deux"];
 const CONCEPTS = ["mamans", "deux_familles", "ressourcement", "fetes", "amis"];
+
+const LANGS = ["fr"];
+const cache = new Map<string, { at: number; html: string }>();
+async function template(lang: string) {
+  const hit = cache.get(lang);
+  if (hit && Date.now() - hit.at < 300000) return hit.html;
+  try {
+    const r = await fetch(`${SITE_URL}/emails/${lang}/confirmation.html`);
+    if (r.ok) { const html = await r.text(); cache.set(lang, { at: Date.now(), html }); return html; }
+  } catch { /* repli ci-dessous */ }
+  return null;
+}
 
 function emailHtml(prenom: string, lien: string) {
   return `<div style="font-family:Arial,sans-serif;background:#F7F4EE;padding:24px">
@@ -78,14 +90,18 @@ Deno.serve(async (req) => {
   }
 
   const lien = `${SUPABASE_URL}/functions/v1/confirmer?token=${token}`;
+  const lang = LANGS.includes(String(b.lang ?? "")) ? String(b.lang) : "fr";
+  const tpl = await template(lang);
+  const html = tpl ? tpl.replaceAll("{{prenom}}", esc(prenom)).replaceAll("{{lien}}", lien) : emailHtml(prenom, lien);
+  const subject = tpl?.match(/<title>(.*?)<\/title>/s)?.[1]?.trim() || "Confirme ton inscription — Vacances Muslims";
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from: FROM,
       to: [email],
-      subject: "Confirme ton inscription — Vacances Muslims",
-      html: emailHtml(prenom, lien),
+      subject,
+      html,
     }),
   });
   if (!r.ok) return json({ error: "email" }, 502);
