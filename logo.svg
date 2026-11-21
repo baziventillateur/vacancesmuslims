@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1FA89B"/><stop offset=".55" stop-color="#0B5E5E"/><stop offset="1" stop-color="#05282A"/></linearGradient>
+    <radialGradient id="glow" cx=".3" cy=".1" r=".9"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".6" stop-color="#fff" stop-opacity=".04"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".4" stop-color="#fff" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".4"/></linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E6FA0"/><stop offset=".45" stop-color="#F3B56B"/><stop offset="1" stop-color="#FFE2A8"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9AE"/><stop offset=".5" stop-color="#E4A93F"/><stop offset="1" stop-color="#A9711F"/></linearGradient>
+    <linearGradient id="pool" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A9F3EE"/><stop offset=".5" stop-color="#2FC0C4"/><stop offset="1" stop-color="#0F7C85"/></linearGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#E7DCC4"/></linearGradient>
+    <radialGradient id="sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFF7D8"/><stop offset="1" stop-color="#FFF7D8" stop-opacity="0"/></radialGradient>
+    <filter id="sh" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="12" stdDeviation="11" flood-color="#021416" flood-opacity=".55"/></filter>
+    <filter id="soft" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="16"/></filter>
+    <clipPath id="tile"><rect x="16" y="16" width="480" height="480" rx="112"/></clipPath>
+    <clipPath id="arch"><path d="M146 436V270A110 110 0 0 1 366 270V436z"/></clipPath>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bg)"/>
+  <g clip-path="url(#tile)">
+    <path d="M256-8l34 62 62-14-14 62 62 14-62 14 14 62-62-14-34 62-34-62-62 14 14-62-62-14 62-14-14-62 62 14z" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="2.5" transform="translate(0 70) scale(1.05)"/>
+    <rect x="16" y="16" width="480" height="480" fill="url(#glow)"/>
+    <ellipse cx="256" cy="300" rx="170" ry="150" fill="#43D3C3" opacity=".3" filter="url(#soft)"/>
+  </g>
+  <!-- ombre + arche dorée -->
+  <g filter="url(#sh)"><path d="M130 440V270A126 126 0 0 1 382 270V440z" fill="url(#gold)"/></g>
+  <path d="M138 436V270A118 118 0 0 1 374 270" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="3"/>
+  <!-- scène dans l'arche -->
+  <g clip-path="url(#arch)">
+    <rect x="130" y="140" width="252" height="310" fill="url(#sky)"/>
+    <circle cx="320" cy="300" r="70" fill="url(#sun)"/><circle cx="320" cy="300" r="15" fill="#FFF3C9"/>
+    <path d="M276 190a34 34 0 1 0 28 54a28 28 0 1 1 -28-54z" fill="#FFF0C4"/>
+    <path d="M330 178l4 11 11 4-11 4-4 11-4-11-11-4 11-4z" fill="#FFF3CF"/>
+    <path d="M130 318c40-22 80-14 120-8s90-16 132 0v60H130z" fill="#4E8F8A" opacity=".8"/>
+    <!-- haie / mur d'intimité -->
+    <rect x="130" y="336" width="252" height="40" fill="#1B5A41"/>
+    <path d="M130 338c10-9 20-9 30 0s20 9 30 0 20-9 30 0 20 9 30 0 20-9 30 0 20 9 30 0 20-9 30 0 20 9 30 0z" fill="#2B8156"/>
+    <!-- villa -->
+    <rect x="186" y="318" width="140" height="58" fill="url(#wall)"/>
+    <rect x="236" y="296" width="80" height="24" fill="url(#wall)"/>
+    <rect x="178" y="312" width="156" height="8" rx="3" fill="#fff"/><rect x="228" y="290" width="96" height="7" rx="3" fill="#fff"/>
+    <rect x="178" y="320" width="156" height="3" fill="#000" opacity=".14"/>
+    <rect x="196" y="332" width="38" height="36" fill="#FFC965"/><rect x="246" y="328" width="70" height="40" fill="#FFB347"/>
+    <path d="M215 332v36M278 328v40M298 328v40" stroke="#fff" stroke-width="2.4" opacity=".9"/>
+    <!-- terrasse + piscine -->
+    <rect x="130" y="372" width="252" height="10" fill="#EAD9B9"/>
+    <rect x="130" y="382" width="252" height="70" fill="url(#pool)"/>
+    <rect x="200" y="384" width="120" height="44" fill="#FFD98A" opacity=".4"/>
+    <path d="M150 400c14-7 28 7 42 0s28 7 42 0 28 7 42 0 28 7 42 0 28 7 42 0" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="5" stroke-linecap="round"/>
+    <path d="M150 426c14-7 28 7 42 0s28 7 42 0 28 7 42 0 28 7 42 0" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="4" stroke-linecap="round"/>
+    <rect x="130" y="382" width="252" height="6" fill="#fff" opacity=".5"/>
+    <!-- cyprès -->
+    <path d="M160 372c14-26 16-62 0-98c-16 36-14 72 0 98z" fill="#17513A"/><path d="M160 276c6 30 6 62 0 96z" fill="#2B8156" opacity=".8"/>
+    <path d="M352 372c14-22 16-52 0-84c-16 32-14 62 0 84z" fill="#17513A"/>
+  </g>
+  <rect x="17.5" y="17.5" width="477" height="477" rx="110.5" fill="none" stroke="url(#edge)" stroke-width="3"/>
+</svg>
