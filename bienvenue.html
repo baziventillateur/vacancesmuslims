@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Bienvenue — Vacances Muslims</title>
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="theme-color" content="#0B3D3D">
+<style>
+*{box-sizing:border-box}
+:root{--teal-900:#0B3D3D;--teal-700:#0E6A6A;--gold:#C8923B;--gold-light:#E7BD70;--sand:#F7F4EE;--ink:#1D2B2B;--muted:#55625F}
+html,body{margin:0;min-height:100%}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:#082C2C radial-gradient(900px 600px at 15% 0%,#14807F 0%,#0B3D3D 45%,#041E1F 100%) fixed;display:flex;flex-direction:column;align-items:center;padding:22px 14px 40px}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:17px;margin:4px 0 18px}
+.brand img{width:36px;height:36px;border-radius:10px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+.brand span{color:var(--gold-light)}
+.card{width:100%;max-width:440px;background:#fff;border-radius:22px;box-shadow:0 24px 50px rgba(0,0,0,.45);overflow:hidden}
+.bar{height:5px;background:#E9E3D4}.bar i{display:block;height:100%;width:25%;background:linear-gradient(90deg,var(--gold-light),var(--gold));transition:width .4s}
+.step{display:none;padding:22px 20px 20px;animation:in .35s ease}
+.step.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--teal-700)}
+h1{font-size:23px;line-height:1.2;margin:6px 0 8px;color:#082C2C}
+p{margin:0 0 14px;font-size:14.5px;line-height:1.5;color:var(--muted)}
+.pts{display:grid;gap:8px;margin:0 0 16px}
+.pt{display:flex;gap:10px;align-items:flex-start;background:var(--sand);border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.4}
+.pt b{display:block;color:var(--ink)}
+.ic{flex:none;width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:grid;place-items:center;font-size:14px}
+.btn{width:100%;border:0;border-radius:12px;padding:12px 16px;font:inherit;font-size:15px;font-weight:700;color:#2A1A00;background:linear-gradient(180deg,var(--gold-light),var(--gold));box-shadow:0 8px 18px rgba(200,146,59,.4);cursor:pointer}
+.btn:disabled{opacity:.5;box-shadow:none;cursor:default}
+.link{display:block;margin:10px auto 0;border:0;background:none;color:var(--muted);font:inherit;font-size:13px;text-decoration:underline;cursor:pointer}
+.choices{display:grid;gap:8px;margin:0 0 14px}
+.choice{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:1.5px solid #E1DCCF;background:#fff;border-radius:14px;padding:12px;font:inherit;cursor:pointer;transition:.2s}
+.choice b{display:block;font-size:15px}.choice small{color:var(--muted);font-size:12.5px}
+.choice[aria-pressed=true]{border-color:var(--teal-700);background:#EAF4F2;box-shadow:0 0 0 3px rgba(14,106,106,.12)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+.chip{border:1.5px solid #E1DCCF;background:#fff;border-radius:999px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;transition:.2s}
+.chip[aria-pressed=true]{background:var(--teal-700);border-color:var(--teal-700);color:#fff}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px;color:var(--muted)}
+.top button{border:0;background:none;color:var(--teal-700);font:inherit;font-weight:700;font-size:12.5px;text-decoration:underline;cursor:pointer}
+input[type=text]{width:100%;border:1.5px solid #E1DCCF;border-radius:12px;padding:11px 12px;font:inherit;font-size:14px;margin:0 0 12px}
+input[type=text]:focus{outline:0;border-color:var(--teal-700)}
+label.chk{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(--ink);margin:0 0 14px}
+label.chk input{margin-top:2px;accent-color:var(--teal-700)}
+.big{width:56px;height:56px;border-radius:50%;background:#EAF4F2;display:grid;place-items:center;margin:2px auto 12px}
+.center{text-align:center}
+.err{color:#9A3B1E;font-size:13px;margin:8px 0 0;min-height:1em}
+</style>
+</head>
+<body>
+<div class="brand"><img src="assets/icon-192.png" alt="" width="36" height="36">Vacances <span>Muslims</span></div>
+<main class="card" id="app">
+ <div class="bar"><i id="bar"></i></div>
+
+ <section class="step on" data-s="0">
+  <div class="eyebrow">E-mail confirmé</div>
+  <h1 id="hello">Bienvenue !</h1>
+  <p>Ta place sur la liste d'attente est réservée. Voici en 20 secondes ce qui t'attend.</p>
+  <div class="pts">
+   <div class="pt"><span class="ic">🏡</span><span><b>Des maisons privées, sans vis-à-vis</b>Piscines privées et propriétaires de confiance.</span></div>
+   <div class="pt"><span class="ic">🔒</span><span><b>Paiement sécurisé</b>Un acompte de 30 % protégé jusqu'à ton arrivée.</span></div>
+   <div class="pt"><span class="ic">0%</span><span><b>0 % de commission Vacances Muslims</b>Pour les premiers inscrits, pendant 12 mois.</span></div>
+  </div>
+  <button class="btn" data-next>Continuer</button>
+ </section>
+
+ <section class="step" data-s="1">
+  <div class="eyebrow">Question 1 sur 2</div>
+  <h1>Tu es plutôt…</h1>
+  <p>Cela nous aide à préparer le bon accueil.</p>
+  <div class="choices" id="profils">
+   <button type="button" class="choice" data-v="voyageur" aria-pressed="false"><span class="ic">🧳</span><span><b>Voyageur</b><small>Je cherche une maison pour mes vacances</small></span></button>
+   <button type="button" class="choice" data-v="proprietaire" aria-pressed="false"><span class="ic">🔑</span><span><b>Propriétaire</b><small>Je veux louer ma maison</small></span></button>
+   <button type="button" class="choice" data-v="les_deux" aria-pressed="false"><span class="ic">✨</span><span><b>Les deux</b><small>Je voyage et je loue aussi</small></span></button>
+  </div>
+  <button class="btn" id="p-next" disabled>Continuer</button>
+  <button class="link" data-skip>Passer</button>
+ </section>
+
+ <section class="step" data-s="2">
+  <div class="eyebrow">Question 2 sur 2</div>
+  <h1>Des moments à partager ?</h1>
+  <p>Des concepts organisés avec les propriétaires. Choisis ce que tu veux, ou rien du tout.</p>
+  <div class="top"><span>Bientôt disponibles</span><button type="button" id="all">Tout sélectionner</button></div>
+  <div class="chips" id="chips">
+   <button type="button" class="chip" data-v="mamans" aria-pressed="false">☕ Après-midi entre mamans</button>
+   <button type="button" class="chip" data-v="deux_familles" aria-pressed="false">🏡 Deux familles, une maison</button>
+   <button type="button" class="chip" data-v="ressourcement" aria-pressed="false">🌙 Week-end ressourcement entre sœurs</button>
+   <button type="button" class="chip" data-v="fetes" aria-pressed="false">🎉 Fêtes en petit comité</button>
+   <button type="button" class="chip" data-v="amis" aria-pressed="false">🔥 Week-end entre amis</button>
+  </div>
+  <input type="text" id="idee" maxlength="200" placeholder="Une autre idée ? Ex. : sortie entre pères et fils">
+  <label class="chk" id="own" hidden><input type="checkbox" id="accueil"><span>Ma maison pourrait accueillir des concepts.</span></label>
+  <button class="btn" id="fin">Terminer</button>
+  <div class="err" id="err" role="alert"></div>
+ </section>
+
+ <section class="step center" data-s="3">
+  <div class="big"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0E6A6A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+  <h1 id="bye">C'est noté !</h1>
+  <p>Nous examinons ton inscription et revenons vers toi d'ici quelques jours. Tu seras prévenu(e) de la date d'ouverture, en même temps que toute la communauté.</p>
+  <a class="btn" style="display:block;text-decoration:none" href="./">Retour au site</a>
+ </section>
+</main>
+
+<script>
+const API = "https://fvrcgagumwkjfqctdfhs.supabase.co/functions/v1/onboarding";
+const token = new URLSearchParams(location.search).get("t") || "";
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+let profil = "", step = 0;
+const call = body => fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, ...body }) }).then(r => r.json());
+const go = n => {
+  step = n;
+  $$(".step").forEach(s => s.classList.toggle("on", +s.dataset.s === n));
+  $("#bar").style.width = (n + 1) * 25 + "%";
+  scrollTo({ top: 0, behavior: "smooth" });
+};
+call({ action: "get" }).then(r => {
+  if (r.prenom) {
+    $("#hello").textContent = "Bienvenue, " + r.prenom + " !";
+    $("#bye").textContent = "C'est noté, " + r.prenom + " !";
+  }
+}).catch(() => {});
+$("[data-next]").onclick = () => go(1);
+$$("#profils .choice").forEach(b => b.onclick = () => {
+  profil = b.dataset.v;
+  $$("#profils .choice").forEach(x => x.setAttribute("aria-pressed", x === b));
+  $("#p-next").disabled = false;
+});
+const toStep2 = () => { $("#own").hidden = !(profil === "proprietaire" || profil === "les_deux"); go(2); };
+$("#p-next").onclick = () => { call({ profil }).catch(() => {}); toStep2(); };
+$("[data-skip]").onclick = toStep2;
+const chips = $$("#chips .chip");
+chips.forEach(c => c.onclick = () => { c.setAttribute("aria-pressed", c.getAttribute("aria-pressed") !== "true"); sync(); });
+const sync = () => { $("#all").textContent = chips.every(c => c.getAttribute("aria-pressed") === "true") ? "Tout désélectionner" : "Tout sélectionner"; };
+$("#all").onclick = () => { const on = !chips.every(c => c.getAttribute("aria-pressed") === "true"); chips.forEach(c => c.setAttribute("aria-pressed", on)); sync(); };
+$("#fin").onclick = async () => {
+  const b = $("#fin"); b.disabled = true; $("#err").textContent = "";
+  try {
+    const r = await call({
+      interets: chips.filter(c => c.getAttribute("aria-pressed") === "true").map(c => c.dataset.v),
+      idee: $("#idee").value, accueil: !$("#own").hidden && $("#accueil").checked
+    });
+    if (r.status !== "ok") throw 0;
+    go(3);
+  } catch (e) { $("#err").textContent = "Une erreur est survenue. Réessaie dans un instant."; b.disabled = false; }
+};
+if (!token) go(3);
+</script>
+</body>
+</html>

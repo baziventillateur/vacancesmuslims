@@ -9,6 +9,7 @@ const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: fal
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const go = (query: string) => Response.redirect(`${SITE_URL}/?${query}`, 302);
+const welcome = (token: string) => Response.redirect(`${SITE_URL}/bienvenue.html?t=${token}`, 302);
 
 Deno.serve(async (req) => {
   const token = new URL(req.url).searchParams.get("token") ?? "";
@@ -21,5 +22,5 @@ Deno.serve(async (req) => {
   if (!data.confirmed_at) {
     await db.from("waitlist").update({ confirmed_at: new Date().toISOString() }).eq("id", data.id);
   }
-  return go("confirme=1");
+  return welcome(token);
 });

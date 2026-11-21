@@ -633,29 +633,6 @@ dialog p{font-size:14px;color:#3D4A47;margin-bottom:18px}
         <label class="field"><span>Prénom</span><input type="text" name="prenom" autocomplete="given-name" maxlength="60" placeholder="Ton prénom" required></label>
         <label class="field"><span>E-mail</span><input type="email" name="email" autocomplete="email" maxlength="254" placeholder="toi@exemple.fr" required></label>
       </div>
-      <fieldset class="seg">
-        <legend>Je suis</legend>
-        <div>
-          <label><input type="radio" name="profil" value="voyageur" checked><span>Voyageur</span></label>
-          <label><input type="radio" name="profil" value="proprietaire"><span>Propriétaire</span></label>
-          <label><input type="radio" name="profil" value="les_deux"><span>Les deux</span></label>
-        </div>
-      </fieldset>
-      <details class="moments">
-        <summary><span>✨ Quels moments t'intéresseraient ? <small>(facultatif)</small></span></summary>
-        <div class="mom-body">
-          <div class="mom-top"><span>Choisis ce que tu veux, ou rien du tout.</span><button type="button" class="mom-all">Tout sélectionner</button></div>
-          <div class="chips">
-            <label><input type="checkbox" name="interet" value="mamans"><span><i>☕</i>Après-midi entre mamans</span></label>
-            <label><input type="checkbox" name="interet" value="deux_familles"><span><i>🏡</i>Deux familles, une maison</span></label>
-            <label><input type="checkbox" name="interet" value="ressourcement"><span><i>🌙</i>Week-end ressourcement entre sœurs</span></label>
-            <label><input type="checkbox" name="interet" value="fetes"><span><i>🎉</i>Fêtes en petit comité</span></label>
-            <label><input type="checkbox" name="interet" value="amis"><span><i>🔥</i>Week-end entre amis</span></label>
-          </div>
-          <label class="field"><span>Une autre idée de concept ?</span><input type="text" name="idee" maxlength="200" placeholder="Ex. : sortie entre pères et fils"></label>
-        </div>
-      </details>
-      <label class="consent owner-opt"><input type="checkbox" name="accueil"><span>Ma maison pourrait accueillir des concepts.</span></label>
       <label class="consent"><input type="checkbox" name="consent"><span>J'accepte de recevoir un e-mail pour confirmer mon inscription et d'être informé(e) de l'ouverture du site.</span></label>
       <button class="btn" type="submit">Réserver ma place</button>
       <div class="form-msg" role="alert" aria-live="polite"></div>
@@ -695,26 +672,13 @@ $$("[data-form-slot]").forEach(slot => {
   slot.appendChild(tpl.content.cloneNode(true));
   const form = $("form", slot), msg = $(".form-msg", slot), btn = $("button[type=submit]", slot);
   const fail = t => { msg.textContent = t; };
-  const boxes = $$("input[name=interet]", form), allBtn = $(".mom-all", form), own = $(".owner-opt", form);
-  const syncAll = () => { allBtn.textContent = boxes.every(b => b.checked) ? "Tout désélectionner" : "Tout sélectionner"; };
-  allBtn.addEventListener("click", () => { const on = !boxes.every(b => b.checked); boxes.forEach(b => b.checked = on); syncAll(); });
-  boxes.forEach(b => b.addEventListener("change", syncAll));
-  $$("input[name=profil]", form).forEach(r => r.addEventListener("change", () => {
-    const owner = form.profil.value !== "voyageur";
-    own.classList.toggle("show", owner);
-    if (!owner) $("input", own).checked = false;
-  }));
   form.addEventListener("submit", async e => {
     e.preventDefault(); fail("");
     const d = new FormData(form);
     const p = {
       prenom: String(d.get("prenom") || "").trim(),
       email: String(d.get("email") || "").trim().toLowerCase(),
-      profil: String(d.get("profil") || ""),
       consent: !!d.get("consent"),
-      interets: d.getAll("interet").map(String),
-      idee: String(d.get("idee") || "").trim().slice(0, 200),
-      accueil: !!d.get("accueil"),
       website: String(d.get("hp_champ") || "")
     };
     if (!p.prenom) return fail("Indique ton prénom.");
@@ -749,7 +713,7 @@ function showDone(slot, p, status) {
     t.textContent = "Ton adresse est déjà confirmée. Nous revenons vers toi très bientôt.";
   } else {
     h.textContent = "Dernière étape, " + p.prenom + " !";
-    t.textContent = "Nous venons d'envoyer un e-mail à " + p.email + ". Clique sur le lien pour confirmer ton adresse. Ensuite, nous examinons ton inscription et revenons vers toi d'ici quelques jours.";
+    t.textContent = "Nous venons d'envoyer un e-mail à " + p.email + ". Clique sur le lien pour confirmer ton adresse : tu pourras ensuite découvrir le projet.";
     s.textContent = "Tu ne le vois pas ? Pense à regarder dans tes courriers indésirables.";
   }
   wrap.append(tick, h, t, s); box.appendChild(wrap);

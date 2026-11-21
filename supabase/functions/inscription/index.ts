@@ -21,9 +21,6 @@ const json = (body: unknown, status = 200) =>
 const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 
-const PROFILS = ["voyageur", "proprietaire", "les_deux"];
-const CONCEPTS = ["mamans", "deux_familles", "ressourcement", "fetes", "amis"];
-
 const LANGS = ["fr"];
 const cache = new Map<string, { at: number; html: string }>();
 async function template(lang: string) {
@@ -59,17 +56,9 @@ Deno.serve(async (req) => {
 
   const prenom = String(b.prenom ?? "").trim().slice(0, 60);
   const email = String(b.email ?? "").trim().toLowerCase();
-  const profil = String(b.profil ?? "");
-  if (!prenom || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)
-      || !PROFILS.includes(profil) || b.consent !== true) {
+  if (!prenom || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || b.consent !== true) {
     return json({ error: "invalid" }, 400);
   }
-
-  const interets = Array.isArray(b.interets)
-    ? [...new Set(b.interets.filter((x): x is string => typeof x === "string" && CONCEPTS.includes(x)))]
-    : [];
-  const idee = String(b.idee ?? "").trim().slice(0, 200) || null;
-  const accueille_concepts = b.accueil === true && profil !== "voyageur";
 
   const { data: existing, error: e1 } = await db
     .from("waitlist").select("id, confirm_token, confirmed_at").eq("email", email).maybeSingle();
@@ -80,10 +69,10 @@ Deno.serve(async (req) => {
   let token: string;
   if (existing) {
     token = existing.confirm_token;
-    await db.from("waitlist").update({ prenom, profil, interets, idee, accueille_concepts }).eq("id", existing.id);
+    await db.from("waitlist").update({ prenom }).eq("id", existing.id);
   } else {
     const { data, error } = await db
-      .from("waitlist").insert({ email, prenom, profil, consentement: true, interets, idee, accueille_concepts })
+      .from("waitlist").insert({ email, prenom, consentement: true })
       .select("confirm_token").single();
     if (error || !data) return json({ error: "db" }, 500);
     token = data.confirm_token;

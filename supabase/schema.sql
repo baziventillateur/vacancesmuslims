@@ -24,3 +24,6 @@ alter table public.waitlist enable row level security;
 alter table public.waitlist add column if not exists interets text[] not null default '{}';
 alter table public.waitlist add column if not exists idee text;
 alter table public.waitlist add column if not exists accueille_concepts boolean not null default false;
+
+-- Le profil est demandé après confirmation (page bienvenue.html)
+alter table public.waitlist alter column profil drop not null;
