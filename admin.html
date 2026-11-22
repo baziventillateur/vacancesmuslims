@@ -58,8 +58,14 @@ input,select,textarea{font:inherit;width:100%;border:1px solid #D6D1C3;border-ra
 <div id="login" class="login wrap">
   <div class="card">
     <h1 style="font-size:19px">Admin</h1>
-    <p>Vacances Muslims. Connexion par code envoyé par e-mail.</p>
-    <div id="l1">
+    <p>Vacances Muslims. Connexion avec ton code perso, ou par code envoyé par e-mail.</p>
+    <div id="lp">
+      <input id="em0" type="email" placeholder="Ton e-mail" autocomplete="email" inputmode="email">
+      <input id="pin" type="password" inputmode="numeric" placeholder="Ton code perso" autocomplete="current-password">
+      <button id="gopin" style="width:100%">Entrer</button>
+      <button id="tomail" class="alt" style="width:100%;margin-top:6px">Recevoir un code par e-mail</button>
+    </div>
+    <div id="l1" hidden>
       <input id="em" type="email" placeholder="Ton e-mail" autocomplete="email" inputmode="email">
       <button id="send" style="width:100%">Recevoir le code</button>
     </div>
@@ -87,6 +93,13 @@ input,select,textarea{font:inherit;width:100%;border:1px solid #D6D1C3;border-ra
       <div id="list"></div>
       <button class="alt more" id="more" hidden>Tout voir</button>
       <button class="alt more" id="csv">Exporter en CSV</button>
+    </div>
+
+    <div class="card">
+      <h2>Mon code perso</h2>
+      <small style="color:var(--mut)" id="pinst">6 à 10 chiffres, pour entrer sans e-mail.</small>
+      <div class="row" style="margin-top:8px"><input id="np" type="password" inputmode="numeric" placeholder="Nouveau code" maxlength="10"><button id="sp">Enregistrer</button></div>
+      <div class="msg" id="pnm"></div>
     </div>
 
     <div class="card">
@@ -125,7 +138,23 @@ $("#send").onclick = async () => {
   catch { $("#lm").textContent = "Impossible pour le moment."; }
   $("#send").disabled = false;
 };
-$("#back").onclick = () => { $("#l2").hidden = true; $("#l1").hidden = false; $("#lm").textContent = ""; };
+$("#tomail").onclick = () => { $("#lp").hidden = true; $("#l1").hidden = false; $("#em").value = $("#em0").value; $("#lm").textContent = ""; };
+$("#gopin").onclick = async () => {
+  $("#lm").className = "msg"; $("#lm").textContent = ""; $("#gopin").disabled = true;
+  try {
+    const j = await call({ action: "login_pin", email: $("#em0").value.trim(), pin: $("#pin").value });
+    tok = j.token; try { localStorage.setItem("vm_admin", tok); } catch {}
+    show(true); loadAll();
+  } catch { $("#lm").textContent = "Code incorrect, ou pas encore défini (utilise l'e-mail)."; }
+  $("#gopin").disabled = false;
+};
+$("#pin").addEventListener("keydown", e => { if (e.key === "Enter") $("#gopin").click(); });
+$("#sp").onclick = async () => {
+  const m = $("#pnm"); m.className = "msg"; m.textContent = "";
+  if (!/^\d{6,10}$/.test($("#np").value)) { m.textContent = "6 à 10 chiffres."; return; }
+  try { await call({ action: "set_pin", pin: $("#np").value }); $("#np").value = ""; m.className = "msg ok"; m.textContent = "Code enregistré."; } catch { m.textContent = "Échec."; }
+};
+$("#back").onclick = () => { $("#l2").hidden = true; $("#lp").hidden = false; $("#lm").textContent = ""; };
 $("#go").onclick = async () => {
   $("#lm").className = "msg"; $("#lm").textContent = "";
   $("#go").disabled = true;

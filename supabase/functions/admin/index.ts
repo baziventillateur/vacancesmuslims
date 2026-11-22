@@ -86,7 +86,35 @@ Deno.serve(async (req) => {
     return json({ status: "ok", token });
   }
 
+  // 2 bis) Connexion avec un code perso choisi par l'admin (5 essais, puis blocage 15 min)
+  if (action === "login_pin") {
+    const email = String(b.email ?? "").trim().toLowerCase();
+    const pin = String(b.pin ?? "").replace(/\D/g, "");
+    const st = (JSON.parse(await getSet("admin_pin_state") ?? "null") ?? { tries: 0, lock: 0 }) as { tries: number; lock: number };
+    const stored = await getSet("admin_pin");
+    if (email !== ADMIN_EMAIL || !stored || st.lock > Date.now()) return json({ error: "code" }, 401);
+    if (await sha("pin:" + pin) !== stored) {
+      st.tries++;
+      if (st.tries >= 5) { st.tries = 0; st.lock = Date.now() + 15 * 60_000; }
+      await setSet("admin_pin_state", JSON.stringify(st));
+      return json({ error: "code" }, 401);
+    }
+    await setSet("admin_pin_state", JSON.stringify({ tries: 0, lock: 0 }));
+    const token = crypto.randomUUID() + crypto.randomUUID();
+    await setSet("admin_sess_" + await sha(token), String(Date.now() + 12 * 3600_000));
+    return json({ status: "ok", token });
+  }
+
   if (!(await authed(req))) return json({ error: "auth" }, 401);
+
+  if (action === "set_pin") {
+    const pin = String(b.pin ?? "");
+    if (!/^\d{6,10}$/.test(pin)) return json({ error: "invalid" }, 400);
+    await setSet("admin_pin", await sha("pin:" + pin));
+    await setSet("admin_pin_state", JSON.stringify({ tries: 0, lock: 0 }));
+    return json({ status: "ok" });
+  }
+  if (action === "has_pin") return json({ has: !!(await getSet("admin_pin")) });
 
   if (action === "logout") {
     const t = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");

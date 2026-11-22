@@ -726,6 +726,7 @@ $$("[data-form-slot]").forEach(slot => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(p.email)) return fail("Vérifie ton adresse e-mail.");
     if (!p.consent) return fail("Coche la case pour continuer.");
     btn.disabled = true; btn.classList.add("loading");
+    if (window.VM) { await VM.checkAdmin(p.email); VM.adminButton(); }
     try {
       let r = { status: "ok" };
       if (CONFIG.ENDPOINT) {

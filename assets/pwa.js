@@ -52,4 +52,21 @@
   };
   VM.token = () => { try { return localStorage.getItem("vm_token") || ""; } catch { return ""; } };
   VM.saveToken = t => { try { if (t) localStorage.setItem("vm_token", t); } catch {} };
+  // Bouton Admin : reconnaît l'e-mail de l'admin sans l'exposer (empreinte SHA-256).
+  VM.checkAdmin = async email => {
+    try {
+      const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(email).trim().toLowerCase()));
+      const h = [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, "0")).join("");
+      if (h === "d798d571e45b39bcdd8485b40d154ae7fae9e32ae12711bedfdfcb8ca1d2c798") localStorage.setItem("vm_isadmin", "1");
+    } catch {}
+  };
+  VM.isAdmin = () => { try { return localStorage.getItem("vm_isadmin") === "1"; } catch { return false; } };
+  VM.adminButton = () => {
+    if (!VM.isAdmin() || document.getElementById("vm-admin")) return;
+    const a = document.createElement("a");
+    a.id = "vm-admin"; a.href = "/admin.html"; a.textContent = "Admin";
+    a.style.cssText = "position:fixed;top:max(10px,env(safe-area-inset-top));right:10px;z-index:60;background:#C8923B;color:#241705;font:700 12px/1 Inter,system-ui,sans-serif;padding:7px 11px;border-radius:99px;text-decoration:none;box-shadow:0 6px 16px -6px rgba(0,0,0,.5)";
+    document.body.appendChild(a);
+  };
+  document.addEventListener("DOMContentLoaded", VM.adminButton);
 })();
