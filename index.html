@@ -61,6 +61,12 @@ a{color:inherit}
 .hero-form{margin-top:24px;max-width:480px}
 .micro{margin-top:12px;font-size:12px;color:var(--teal-200);display:flex;gap:14px;flex-wrap:wrap}
 .micro span{display:inline-flex;align-items:center;gap:6px}
+.proof{display:flex;align-items:center;gap:10px}
+.av{width:34px;height:34px;border-radius:32%;object-fit:cover;flex:none;border:2px solid rgba(231,189,112,.6)}
+.story{display:flex;align-items:center;gap:18px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+.story img{width:92px;height:92px;border-radius:32%;object-fit:cover;flex:none;box-shadow:0 6px 16px rgba(8,44,44,.18)}
+.story h2{font-size:20px;margin:0 0 6px}.story p{color:var(--muted);font-size:14.5px}
+@media(max-width:420px){.story{flex-direction:column;text-align:center}}
 .proof{margin-top:18px;font-size:12px;color:var(--teal-200);opacity:.9}
 
 /* ---------- Formulaire ---------- */
@@ -385,7 +391,7 @@ dialog p{font-size:14px;color:#3D4A47;margin-bottom:18px}
           <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E7BD70" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Sans engagement</span>
           <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E7BD70" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Ouverture annoncée par e-mail</span>
         </div>
-        <p class="proof">Née d'une communauté de plus de 120 000 membres.</p>
+        <p class="proof"><img class="av" src="assets/communaute-sm.jpg" alt="" width="34" height="34">Née d'une communauté de plus de 120 000 membres.</p>
       </div>
 
       <div class="stage" id="stage" aria-hidden="true">
@@ -572,6 +578,19 @@ dialog p{font-size:14px;color:#3D4A47;margin-bottom:18px}
           <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E6A6A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Gratuit au lancement</li>
         </ul>
       </article>
+    </div>
+  </div>
+</section>
+
+<!-- =============== NOTRE HISTOIRE =============== -->
+<section id="histoire" style="padding:0 0 40px">
+  <div class="wrap">
+    <div class="story rv">
+      <img src="assets/communaute.jpg" alt="Le sourire du groupe Vacances Musulmanes" width="92" height="92" loading="lazy">
+      <div>
+        <h2>Tout est parti d'un groupe</h2>
+        <p>Vacances Musulmanes, c'est d'abord une communauté de plus de 120 000 membres qui se partagent des maisons avec piscine, sans vis-à-vis. Cette plateforme est née pour leur offrir un cadre plus simple, plus sûr et plus serein.</p>
+      </div>
     </div>
   </div>
 </section>
