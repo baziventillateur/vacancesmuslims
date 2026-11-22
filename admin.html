@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin — Vacances Muslims</title>
+<meta name="theme-color" content="#0B3D3D">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<style>
+:root{--t9:#0B3D3D;--t7:#0E6A6A;--t1:#D9E8E6;--sand:#F7F4EE;--ink:#1D2B2B;--mut:#55625F;--line:#E1DCCF;--gold:#C8923B}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.4 Inter,system-ui,sans-serif;background:var(--sand);color:var(--ink)}
+h1,h2{margin:0;font-family:'Space Grotesk',Inter,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:12px}
+.bar{display:flex;justify-content:space-between;align-items:center;background:var(--t9);color:#fff;padding:10px 12px;position:sticky;top:0;z-index:5}
+.bar b{font-size:15px}
+button,.btn{font:inherit;font-weight:600;border:0;border-radius:8px;padding:7px 12px;background:var(--t7);color:#fff;cursor:pointer}
+button.alt{background:#fff;color:var(--t7);border:1px solid var(--line)}
+button.gold{background:var(--gold);color:#241705}
+button.sm{padding:4px 8px;font-size:12px}
+button:disabled{opacity:.6}
+input,select,textarea{font:inherit;width:100%;border:1px solid #D6D1C3;border-radius:8px;padding:8px;background:#fff;font-size:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.card h2{font-size:15px;margin-bottom:8px}
+.login{max-width:340px;margin:12vh auto 0}
+.login .card{padding:16px}
+.login p{color:var(--mut);margin:4px 0 12px;font-size:13px}
+.login input{margin-bottom:8px}
+.msg{color:#B3261E;font-size:12.5px;min-height:16px;margin-top:6px}
+.ok{color:#0a6a3a}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+.tile b{display:block;font:700 22px 'Space Grotesk',Inter,sans-serif;color:var(--t9)}
+.tile span{font-size:11.5px;color:var(--mut)}
+.chart{display:flex;align-items:flex-end;gap:3px;height:70px}
+.chart i{flex:1;background:var(--t7);border-radius:3px 3px 0 0;min-height:2px;position:relative}
+.chart i.z{background:var(--line)}
+.axis{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mut);margin-top:3px}
+.split{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--t1);color:#0a4f4f;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:600}
+.row{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.row>*{flex:1}.row>button{flex:none}
+.item{border-top:1px solid var(--line);padding:8px 0}
+.item:first-of-type{border-top:0}
+.item .t{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.item small{color:var(--mut);display:block;font-size:12px;overflow-wrap:anywhere}
+.tag{font-size:11px;font-weight:700;border-radius:6px;padding:2px 6px;background:#EEE9DA;color:#6B5A2A}
+.tag.approuve{background:#CFE9D8;color:#0a5a2a}.tag.refuse{background:#F4D4D0;color:#8c1d14}
+.tag.ok2{background:var(--t1);color:#0a4f4f}
+.acts{display:flex;gap:6px;margin-top:6px}
+[hidden]{display:none!important}
+.more{width:100%;margin-top:6px}
+</style>
+</head>
+<body>
+
+<div id="login" class="login wrap">
+  <div class="card">
+    <h1 style="font-size:19px">Admin</h1>
+    <p>Vacances Muslims. Connexion par code envoyé par e-mail.</p>
+    <div id="l1">
+      <input id="em" type="email" placeholder="Ton e-mail" autocomplete="email" inputmode="email">
+      <button id="send" style="width:100%">Recevoir le code</button>
+    </div>
+    <div id="l2" hidden>
+      <input id="code" inputmode="numeric" maxlength="6" placeholder="Code à 6 chiffres" autocomplete="one-time-code">
+      <button id="go" style="width:100%">Entrer</button>
+      <button id="back" class="alt" style="width:100%;margin-top:6px">Changer d'e-mail</button>
+    </div>
+    <div class="msg" id="lm"></div>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <div class="bar"><b>Admin · Vacances Muslims</b><span><button class="alt sm" id="refresh">Actualiser</button> <button class="alt sm" id="out">Sortir</button></span></div>
+  <div class="wrap">
+    <div class="tiles" id="tiles"></div>
+
+    <div class="card"><h2>Inscriptions, 14 derniers jours</h2><div class="chart" id="chart"></div><div class="axis"><span id="a0"></span><span id="a1"></span></div></div>
+
+    <div class="card"><h2>Répartition</h2><div class="split" id="split"></div></div>
+
+    <div class="card">
+      <h2>Inscrits <span id="cnt" style="color:var(--mut);font-weight:500;font-size:12px"></span></h2>
+      <div class="row"><input id="q" placeholder="Rechercher prénom ou e-mail"><select id="fs" style="max-width:130px"><option value="">Tous</option><option value="en_attente">En attente</option><option value="approuve">Approuvés</option><option value="refuse">Refusés</option></select></div>
+      <div id="list"></div>
+      <button class="alt more" id="more" hidden>Tout voir</button>
+      <button class="alt more" id="csv">Exporter en CSV</button>
+    </div>
+
+    <div class="card">
+      <h2>Envoyer une notification</h2>
+      <input id="pt" placeholder="Titre" maxlength="80" value="Vacances Muslims">
+      <textarea id="pb" rows="2" maxlength="200" placeholder="Message" style="margin-top:6px"></textarea>
+      <input id="pu" placeholder="Lien (facultatif, ex. https://vacancesmuslims.fr)" style="margin-top:6px">
+      <button class="gold" id="ps" style="margin-top:8px;width:100%">Envoyer à tous les abonnés</button>
+      <div class="msg" id="pm"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "https://fvrcgagumwkjfqctdfhs.supabase.co/functions/v1/admin";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let tok = ""; try { tok = localStorage.getItem("vm_admin") || ""; } catch {}
+let all = false;
+
+async function call(body) {
+  const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json", ...(tok ? { Authorization: "Bearer " + tok } : {}) }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && body.action !== "verify") { signout(); throw new Error("auth"); }
+  if (!r.ok) throw Object.assign(new Error(j.error || "erreur"), { j });
+  return j;
+}
+function show(on) { $("#login").hidden = on; $("#app").hidden = !on; }
+function signout() { tok = ""; try { localStorage.removeItem("vm_admin"); } catch {} show(false); }
+
+$("#send").onclick = async () => {
+  $("#lm").className = "msg"; $("#lm").textContent = "";
+  const email = $("#em").value.trim(); if (!email) return;
+  $("#send").disabled = true;
+  try { await call({ action: "request", email }); $("#l1").hidden = true; $("#l2").hidden = false; $("#lm").className = "msg ok"; $("#lm").textContent = "Si cet e-mail est autorisé, un code vient d'être envoyé."; $("#code").focus(); }
+  catch { $("#lm").textContent = "Impossible pour le moment."; }
+  $("#send").disabled = false;
+};
+$("#back").onclick = () => { $("#l2").hidden = true; $("#l1").hidden = false; $("#lm").textContent = ""; };
+$("#go").onclick = async () => {
+  $("#lm").className = "msg"; $("#lm").textContent = "";
+  $("#go").disabled = true;
+  try {
+    const j = await call({ action: "verify", email: $("#em").value.trim(), code: $("#code").value });
+    tok = j.token; try { localStorage.setItem("vm_admin", tok); } catch {}
+    show(true); loadAll();
+  } catch { $("#lm").textContent = "Code incorrect ou expiré."; }
+  $("#go").disabled = false;
+};
+$("#code").addEventListener("keydown", e => { if (e.key === "Enter") $("#go").click(); });
+$("#em").addEventListener("keydown", e => { if (e.key === "Enter") $("#send").click(); });
+$("#out").onclick = async () => { try { await call({ action: "logout" }); } catch {} signout(); };
+$("#refresh").onclick = loadAll;
+
+async function loadStats() {
+  const s = await call({ action: "stats" });
+  $("#tiles").innerHTML = [
+    [s.total, "Inscrits"], [s.confirmes, "E-mails confirmés"], [s.push, "Abonnés push"],
+    [s.dernieres_24h, "Dernières 24 h"], [s.derniers_7j, "7 derniers jours"], [s.statut.en_attente, "À examiner"],
+  ].map(([n, l]) => `<div class="tile"><b>${n}</b><span>${l}</span></div>`).join("");
+  const max = Math.max(1, ...s.jours.map(j => j.n));
+  $("#chart").innerHTML = s.jours.map(j => `<i class="${j.n ? "" : "z"}" style="height:${Math.max(3, j.n / max * 100)}%" title="${j.d} : ${j.n}"></i>`).join("");
+  $("#a0").textContent = s.jours[0].d.slice(5).split("-").reverse().join("/");
+  $("#a1").textContent = "aujourd'hui · max " + max + "/jour";
+  const p = s.profil, st = s.statut;
+  $("#split").innerHTML = [
+    ["Voyageurs", p.voyageur], ["Propriétaires", p.proprietaire], ["Les deux", p.les_deux], ["Profil non renseigné", p.non_renseigne],
+    ["Approuvés", st.approuve], ["Refusés", st.refuse], ["Concepts OK", s.concepts],
+  ].map(([l, n]) => `<span class="chip">${l} · ${n}</span>`).join("");
+}
+function fmt(d) { return new Date(d).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }); }
+const PROFIL = { voyageur: "Voyageur", proprietaire: "Propriétaire", les_deux: "Les deux" };
+let last = [];
+async function loadList() {
+  const j = await call({ action: "list", q: $("#q").value, statut: $("#fs").value || undefined, limit: all ? 500 : 8 });
+  last = j.rows;
+  $("#cnt").textContent = "(" + j.count + ")";
+  $("#list").innerHTML = j.rows.length ? j.rows.map(r => `
+    <div class="item"><div class="t"><b>${esc(r.prenom)}</b><span><span class="tag ${r.statut}">${r.statut === "en_attente" ? "En attente" : r.statut === "approuve" ? "Approuvé" : "Refusé"}</span> ${r.confirmed_at ? '<span class="tag ok2">E-mail OK</span>' : ""}</span></div>
+      <small>${esc(r.email)}</small>
+      <small>${esc(PROFIL[r.profil] || "Profil non renseigné")} · inscrit le ${fmt(r.created_at)}${r.interets?.length ? " · " + esc(r.interets.join(", ")) : ""}</small>
+      ${r.idee ? `<small>Idée : ${esc(r.idee)}</small>` : ""}
+      <div class="acts"><button class="sm" data-id="${r.id}" data-s="approuve">Approuver</button><button class="alt sm" data-id="${r.id}" data-s="refuse">Refuser</button>${r.statut !== "en_attente" ? `<button class="alt sm" data-id="${r.id}" data-s="en_attente">Remettre en attente</button>` : ""}</div>
+    </div>`).join("") : '<small style="color:var(--mut)">Aucun résultat.</small>';
+  $("#more").hidden = j.count <= 8;
+  $("#more").textContent = all ? "Réduire" : "Tout voir (" + j.count + ")";
+}
+$("#list").onclick = async e => {
+  const b = e.target.closest("button[data-id]"); if (!b) return;
+  b.disabled = true;
+  try { await call({ action: "set_statut", id: b.dataset.id, statut: b.dataset.s }); await Promise.all([loadList(), loadStats()]); } catch {}
+};
+$("#more").onclick = () => { all = !all; loadList(); };
+let tm; $("#q").oninput = () => { clearTimeout(tm); tm = setTimeout(loadList, 300); };
+$("#fs").onchange = loadList;
+
+$("#csv").onclick = async () => {
+  const j = await call({ action: "list", limit: 500 });
+  const cell = v => '"' + String(v ?? "").replace(/"/g, '""').replace(/^([=+\-@])/, "'$1") + '"';
+  const head = ["prenom", "email", "profil", "statut", "email_confirme", "interets", "idee", "inscrit_le"];
+  const rows = j.rows.map(r => [r.prenom, r.email, r.profil, r.statut, r.confirmed_at ? "oui" : "non", (r.interets || []).join("|"), r.idee, r.created_at].map(cell).join(";"));
+  const blob = new Blob(["﻿" + [head.join(";"), ...rows].join("\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "inscrits-vacances-muslims.csv"; a.click();
+};
+
+$("#ps").onclick = async () => {
+  const m = $("#pm"); m.className = "msg"; m.textContent = "";
+  if (!$("#pb").value.trim()) { m.textContent = "Écris un message."; return; }
+  if (!confirm("Envoyer cette notification à tous les abonnés ?")) return;
+  $("#ps").disabled = true;
+  try {
+    const j = await call({ action: "push", title: $("#pt").value, body: $("#pb").value, url: $("#pu").value || "/app.html" });
+    m.className = "msg ok"; m.textContent = "Envoyée à " + j.sent + " appareil(s) sur " + j.total + (j.removed ? " (" + j.removed + " abonnement(s) périmé(s) retiré(s))" : "") + ".";
+  } catch { m.textContent = "Échec de l'envoi."; }
+  $("#ps").disabled = false;
+};
+
+async function loadAll() { try { await Promise.all([loadStats(), loadList()]); } catch {} }
+if (tok) { show(true); loadAll(); }
+</script>
+</body>
+</html>
