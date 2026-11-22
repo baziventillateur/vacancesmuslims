@@ -110,11 +110,48 @@ Deno.serve(async (req) => {
   if (action === "set_pin") {
     const pin = String(b.pin ?? "");
     if (!/^\d{6,10}$/.test(pin)) return json({ error: "invalid" }, 400);
+    const stored = await getSet("admin_pin");
+    if (stored) {
+      // L'ancien code est exigé pour en choisir un nouveau
+      const st = (JSON.parse(await getSet("admin_pin_state") ?? "null") ?? { tries: 0, lock: 0 }) as { tries: number; lock: number };
+      if (st.lock > Date.now()) return json({ error: "locked" }, 429);
+      if (await sha("pin:" + String(b.old ?? "").replace(/\D/g, "")) !== stored) {
+        st.tries++;
+        if (st.tries >= 5) { st.tries = 0; st.lock = Date.now() + 15 * 60_000; }
+        await setSet("admin_pin_state", JSON.stringify(st));
+        return json({ error: "old" }, 403);
+      }
+    }
     await setSet("admin_pin", await sha("pin:" + pin));
     await setSet("admin_pin_state", JSON.stringify({ tries: 0, lock: 0 }));
     return json({ status: "ok" });
   }
   if (action === "has_pin") return json({ has: !!(await getSet("admin_pin")) });
+
+  if (action === "vapid") return json({ public_key: await getSet("vapid_public") ?? null });
+
+  if (action === "admin_push_subscribe") {
+    const endpoint = String(b.endpoint ?? ""), p256dh = String(b.p256dh ?? ""), auth = String(b.auth ?? "");
+    let host = "";
+    try { host = new URL(endpoint).hostname; } catch { /* invalide */ }
+    if (!/(^|\.)(fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com|push\.apple\.com)$/.test(host) || !p256dh || !auth) return json({ error: "invalid" }, 400);
+    const { error } = await db.from("push_subscriptions").upsert({ endpoint, p256dh, auth, waitlist_id: null, is_admin: true }, { onConflict: "endpoint" });
+    return error ? json({ error: "db" }, 500) : json({ status: "ok" });
+  }
+  if (action === "admin_push_status") {
+    const { count } = await db.from("push_subscriptions").select("id", { count: "exact", head: true }).eq("is_admin", true);
+    return json({ devices: count ?? 0 });
+  }
+
+  if (action === "events") {
+    const { data } = await db.from("admin_events").select("id,type,title,detail,waitlist_id,read,created_at").order("created_at", { ascending: false }).limit(Math.min(Number(b.limit) || 30, 200));
+    const { count } = await db.from("admin_events").select("id", { count: "exact", head: true }).eq("read", false);
+    return json({ events: data ?? [], unread: count ?? 0 });
+  }
+  if (action === "events_read") {
+    await db.from("admin_events").update({ read: true }).eq("read", false);
+    return json({ status: "ok" });
+  }
 
   if (action === "logout") {
     const t = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
@@ -136,8 +173,19 @@ Deno.serve(async (req) => {
       if (age < 86400000) c24++;
       if (age < 7 * 86400000) c7++;
     }
-    const { count: push } = await db.from("push_subscriptions").select("id", { count: "exact", head: true });
+    const { count: push } = await db.from("push_subscriptions").select("id", { count: "exact", head: true }).eq("is_admin", false);
+    const since = new Date(now - 14 * 86400000).toISOString().slice(0, 10);
+    const { data: vis } = await db.from("visits").select("day,page,visitor").gte("day", since).limit(20000);
+    const vday: Record<string, { site: number; app: number }> = {};
+    for (const d of Object.keys(days)) vday[d] = { site: 0, app: 0 };
+    const vv = new Set<string>();
+    for (const v of vis ?? []) { const d = String(v.day); if (vday[d]) vday[d][v.page as "site" | "app"]++; vv.add(v.visitor); }
+    const { data: fx } = await db.from("waitlist").select("pwa_installed_at,push_enabled_at");
+    const installes = (fx ?? []).filter((x) => x.pwa_installed_at).length;
+    const pushOn = (fx ?? []).filter((x) => x.push_enabled_at).length;
     return json({
+      installes, push_actifs: pushOn, visiteurs_14j: vv.size,
+      visites: Object.entries(vday).map(([d, v]) => ({ d, site: v.site, app: v.app })),
       total: r.length,
       confirmes: r.filter((x) => x.confirmed_at).length,
       statut: { en_attente: r.filter((x) => x.statut === "en_attente").length, approuve: r.filter((x) => x.statut === "approuve").length, refuse: r.filter((x) => x.statut === "refuse").length },
@@ -152,7 +200,7 @@ Deno.serve(async (req) => {
     const q = String(b.q ?? "").trim().replace(/[%,()]/g, "");
     const limit = Math.min(Number(b.limit) || 8, 500);
     let query = db.from("waitlist")
-      .select("id,prenom,email,profil,statut,interets,idee,accueille_concepts,confirmed_at,created_at", { count: "exact" })
+      .select("id,prenom,email,profil,statut,interets,idee,accueille_concepts,confirmed_at,created_at,pwa_installed_at,push_enabled_at,last_seen_at", { count: "exact" })
       .order("created_at", { ascending: false }).range(0, limit - 1);
     if (q) query = query.or(`prenom.ilike.%${q}%,email.ilike.%${q}%`);
     if (b.statut && ["en_attente", "approuve", "refuse"].includes(String(b.statut))) query = query.eq("statut", String(b.statut));
@@ -172,7 +220,7 @@ Deno.serve(async (req) => {
   if (action === "push") {
     const keys = { publicKey: await getSet("vapid_public"), privateKey: await getSet("vapid_private") };
     if (!keys.publicKey || !keys.privateKey) return json({ error: "vapid" }, 500);
-    const { data: subs } = await db.from("push_subscriptions").select("id,endpoint,p256dh,auth");
+    const { data: subs } = await db.from("push_subscriptions").select("id,endpoint,p256dh,auth").eq("is_admin", false);
     const payload = JSON.stringify({
       title: String(b.title ?? "Vacances Muslims").slice(0, 80),
       body: String(b.body ?? "").slice(0, 200),

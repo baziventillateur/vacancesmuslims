@@ -36,6 +36,30 @@ async function vapid() {
   return { publicKey: m.vapid_public, privateKey: m.vapid_private };
 }
 
+
+async function notifyAdmins(title: string, body: string) {
+  try {
+    const m = await readSettings();
+    if (!m.vapid_public || !m.vapid_private) return;
+    const { data: subs } = await db.from("push_subscriptions").select("id,endpoint,p256dh,auth").eq("is_admin", true);
+    const payload = JSON.stringify({ title, body, url: "/admin.html", tag: "admin" });
+    await Promise.all((subs ?? []).map(async (s) => {
+      try {
+        await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload,
+          { vapidDetails: { subject: "mailto:support@vacancesmuslims.fr", publicKey: m.vapid_public, privateKey: m.vapid_private }, TTL: 3600 });
+      } catch (e) {
+        const st = (e as { statusCode?: number }).statusCode;
+        if (st === 404 || st === 410) await db.from("push_subscriptions").delete().eq("id", s.id);
+      }
+    }));
+  } catch { /* les notifications admin ne doivent jamais bloquer */ }
+}
+async function byToken(token: string) {
+  if (!UUID.test(token)) return null;
+  const { data } = await db.from("waitlist").select("id,prenom,pwa_installed_at,push_enabled_at").eq("confirm_token", token).maybeSingle();
+  return data;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (req.method !== "POST") return json({ error: "method" }, 405);
@@ -53,12 +77,41 @@ Deno.serve(async (req) => {
     }
     let waitlist_id: string | null = null;
     const token = String(b.token ?? "");
-    if (UUID.test(token)) {
-      const { data } = await db.from("waitlist").select("id").eq("confirm_token", token).not("confirmed_at", "is", null).maybeSingle();
-      waitlist_id = data?.id ?? null;
-    }
-    const { error } = await db.from("push_subscriptions").upsert({ endpoint, p256dh, auth, waitlist_id }, { onConflict: "endpoint" });
+    const w = await byToken(token);
+    if (w) waitlist_id = w.id;
+    const { error } = await db.from("push_subscriptions").upsert({ endpoint, p256dh, auth, waitlist_id, is_admin: false }, { onConflict: "endpoint" });
     if (error) return json({ error: "db" }, 500);
+    if (w && !w.push_enabled_at) {
+      await db.from("waitlist").update({ push_enabled_at: new Date().toISOString() }).eq("id", w.id);
+      await notifyAdmins("Notifications activées", `${w.prenom} a activé les notifications`);
+    }
+    return json({ status: "ok" });
+  }
+
+  // Visite (site ou appli) : un visiteur compté une fois par jour et par page
+  if (b.action === "hit") {
+    const visitor = String(b.visitor ?? "").slice(0, 64);
+    const page = b.page === "app" ? "app" : "site";
+    if (visitor.length < 8) return json({ error: "invalid" }, 400);
+    const standalone = b.standalone === true;
+    const w = await byToken(String(b.token ?? ""));
+    await db.from("visits").upsert({ visitor, page, standalone, waitlist_id: w?.id ?? null }, { onConflict: "day,visitor,page", ignoreDuplicates: true });
+    if (w) {
+      const patch: Record<string, unknown> = { last_seen_at: new Date().toISOString() };
+      if (standalone && !w.pwa_installed_at) patch.pwa_installed_at = new Date().toISOString();
+      await db.from("waitlist").update(patch).eq("id", w.id);
+      if (standalone && !w.pwa_installed_at) await notifyAdmins("Appli installée", `${w.prenom} a installé l'appli`);
+    }
+    return json({ status: "ok" });
+  }
+
+  // Installation détectée (événement « appinstalled »)
+  if (b.action === "installed") {
+    const w = await byToken(String(b.token ?? ""));
+    if (w && !w.pwa_installed_at) {
+      await db.from("waitlist").update({ pwa_installed_at: new Date().toISOString() }).eq("id", w.id);
+      await notifyAdmins("Appli installée", `${w.prenom} a installé l'appli`);
+    }
     return json({ status: "ok" });
   }
 
@@ -66,7 +119,7 @@ Deno.serve(async (req) => {
     const m = await readSettings();
     if (!m.admin_key || req.headers.get("x-admin-key") !== m.admin_key) return json({ error: "forbidden" }, 403);
     const keys = await vapid();
-    const { data: subs } = await db.from("push_subscriptions").select("id,endpoint,p256dh,auth");
+    const { data: subs } = await db.from("push_subscriptions").select("id,endpoint,p256dh,auth").eq("is_admin", false);
     const payload = JSON.stringify({
       title: String(b.title ?? "Vacances Muslims").slice(0, 80),
       body: String(b.body ?? "").slice(0, 200),

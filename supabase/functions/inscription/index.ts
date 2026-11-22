@@ -1,4 +1,5 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import webpush from "npm:web-push@3.6.7";
 
 // Secrets à définir : RESEND_API_KEY, SITE_URL (ex. https://monsite.fr), FROM_EMAIL (facultatif)
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -44,6 +45,25 @@ function emailHtml(prenom: string, lien: string) {
   </div></div>`;
 }
 
+async function notifyAdmins(title: string, body: string) {
+  try {
+    const { data: set } = await db.from("app_settings").select("key,value").in("key", ["vapid_public", "vapid_private"]);
+    const m = Object.fromEntries((set ?? []).map((r) => [r.key, r.value as string]));
+    if (!m.vapid_public || !m.vapid_private) return;
+    const { data: subs } = await db.from("push_subscriptions").select("id,endpoint,p256dh,auth").eq("is_admin", true);
+    const payload = JSON.stringify({ title, body, url: "/admin.html", tag: "admin" });
+    await Promise.all((subs ?? []).map(async (s) => {
+      try {
+        await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload,
+          { vapidDetails: { subject: "mailto:support@vacancesmuslims.fr", publicKey: m.vapid_public, privateKey: m.vapid_private }, TTL: 3600 });
+      } catch (e) {
+        const st = (e as { statusCode?: number }).statusCode;
+        if (st === 404 || st === 410) await db.from("push_subscriptions").delete().eq("id", s.id);
+      }
+    }));
+  } catch { /* ne bloque jamais l'inscription */ }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (req.method !== "POST") return json({ error: "method" }, 405);
@@ -76,6 +96,7 @@ Deno.serve(async (req) => {
       .select("confirm_token").single();
     if (error || !data) return json({ error: "db" }, 500);
     token = data.confirm_token;
+    await notifyAdmins("Nouvelle inscription", `${prenom} vient de s'inscrire`);
   }
 
   const lien = `${SITE_URL}/bienvenue.html?t=${token}`;

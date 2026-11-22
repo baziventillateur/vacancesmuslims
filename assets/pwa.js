@@ -2,12 +2,16 @@
 (function () {
   const API = "https://fvrcgagumwkjfqctdfhs.supabase.co/functions/v1/";
   const VM = window.VM = {};
+  const post = (fn, body) => fetch(API + fn, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), keepalive: true }).catch(() => {});
   VM.standalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
   VM.ios = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   let bip = null;
   addEventListener("beforeinstallprompt", e => { e.preventDefault(); bip = e; document.dispatchEvent(new Event("vm-install-ready")); });
-  addEventListener("appinstalled", () => { bip = null; document.dispatchEvent(new Event("vm-installed")); });
+  addEventListener("appinstalled", () => {
+    bip = null; document.dispatchEvent(new Event("vm-installed"));
+    const t = VM.token(); if (t) post("push", { action: "installed", token: t });
+  });
   VM.canPrompt = () => !!bip;
   VM.install = async () => {
     if (!bip) return false;
@@ -69,4 +73,15 @@
     document.body.appendChild(a);
   };
   document.addEventListener("DOMContentLoaded", VM.adminButton);
+  // Suivi des visites (un visiteur compté une fois par jour et par page) — l'admin n'est pas compté
+  addEventListener("load", () => {
+    try {
+      if (VM.isAdmin()) return;
+      let v = localStorage.getItem("vm_vid");
+      if (!v) { v = crypto.randomUUID(); localStorage.setItem("vm_vid", v); }
+      const page = /app\.html$/.test(location.pathname) ? "app" : "site";
+      const t = new URLSearchParams(location.search).get("t") || VM.token();
+      post("push", { action: "hit", visitor: v, page, standalone: VM.standalone(), token: t || "" });
+    } catch {}
+  });
 })();

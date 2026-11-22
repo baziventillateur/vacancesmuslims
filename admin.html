@@ -36,6 +36,13 @@ input,select,textarea{font:inherit;width:100%;border:1px solid #D6D1C3;border-ra
 .chart{display:flex;align-items:flex-end;gap:3px;height:70px}
 .chart i{flex:1;background:var(--t7);border-radius:3px 3px 0 0;min-height:2px;position:relative}
 .chart i.z{background:var(--line)}
+.lg{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--mut);margin-bottom:6px}.lg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px}
+.chart3{display:flex;align-items:flex-end;gap:5px;height:96px}
+.chart3 .g{flex:1;display:flex;align-items:flex-end;gap:1px;height:100%}
+.chart3 .g i{flex:1;border-radius:2px 2px 0 0;min-height:2px}
+.ev{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line)}.ev:first-child{border-top:0}
+.ev b{font-size:13px}.ev small{display:block;color:var(--mut);font-size:11.5px}.ev.n{background:#FBF3E0;margin:0 -6px;padding:7px 6px;border-radius:8px}
+.dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none;background:var(--t7)}
 .axis{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mut);margin-top:3px}
 .split{display:flex;flex-wrap:wrap;gap:6px}
 .chip{background:var(--t1);color:#0a4f4f;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:600}
@@ -79,11 +86,14 @@ input,select,textarea{font:inherit;width:100%;border:1px solid #D6D1C3;border-ra
 </div>
 
 <div id="app" hidden>
-  <div class="bar"><b>Admin · Vacances Muslims</b><span><button class="alt sm" id="refresh">Actualiser</button> <button class="alt sm" id="out">Sortir</button></span></div>
+  <div class="bar"><b>Admin · Vacances Muslims</b><span><button class="alt sm" id="bell" aria-label="Notifications" style="position:relative"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 003.4 0"/></svg><i id="bdg" hidden style="position:absolute;top:-6px;right:-6px;background:#B3261E;color:#fff;font:700 10px/16px Inter,sans-serif;min-width:16px;height:16px;border-radius:9px;text-align:center;font-style:normal;padding:0 3px"></i></button> <button class="alt sm" id="refresh">Actualiser</button> <button class="alt sm" id="out">Sortir</button></span></div>
   <div class="wrap">
+    <div class="card" id="evcard" hidden style="margin-top:0;margin-bottom:10px"><h2>Notifications <button class="alt sm" id="evread" style="float:right">Tout marquer lu</button></h2><div id="evlist"></div><button class="alt more" id="evmore" hidden>Tout voir</button></div>
     <div class="tiles" id="tiles"></div>
 
-    <div class="card"><h2>Inscriptions, 14 derniers jours</h2><div class="chart" id="chart"></div><div class="axis"><span id="a0"></span><span id="a1"></span></div></div>
+    <div class="card"><h2>Activité des 14 derniers jours</h2>
+      <div class="lg"><span><i style="background:#0E6A6A"></i>Inscriptions</span><span><i style="background:#C8923B"></i>Visiteurs de l'appli</span><span><i style="background:#9DB9B5"></i>Visiteurs du site</span></div>
+      <div class="chart3" id="chart"></div><div class="axis"><span id="a0"></span><span id="a1"></span></div></div>
 
     <div class="card"><h2>Répartition</h2><div class="split" id="split"></div></div>
 
@@ -98,8 +108,16 @@ input,select,textarea{font:inherit;width:100%;border:1px solid #D6D1C3;border-ra
     <div class="card">
       <h2>Mon code perso</h2>
       <small style="color:var(--mut)" id="pinst">6 à 10 chiffres, pour entrer sans e-mail.</small>
+      <input id="op" type="password" inputmode="numeric" placeholder="Ancien code" maxlength="10" style="margin-top:8px" hidden>
       <div class="row" style="margin-top:8px"><input id="np" type="password" inputmode="numeric" placeholder="Nouveau code" maxlength="10"><button id="sp">Enregistrer</button></div>
       <div class="msg" id="pnm"></div>
+    </div>
+
+    <div class="card">
+      <h2>Notifications sur ce téléphone</h2>
+      <small style="color:var(--mut)" id="apst">Reçois une alerte à chaque inscription, installation ou activation des notifications.</small>
+      <button id="apbtn" style="margin-top:8px;width:100%">Activer sur cet appareil</button>
+      <div class="msg" id="apm"></div>
     </div>
 
     <div class="card">
@@ -152,7 +170,10 @@ $("#pin").addEventListener("keydown", e => { if (e.key === "Enter") $("#gopin").
 $("#sp").onclick = async () => {
   const m = $("#pnm"); m.className = "msg"; m.textContent = "";
   if (!/^\d{6,10}$/.test($("#np").value)) { m.textContent = "6 à 10 chiffres."; return; }
-  try { await call({ action: "set_pin", pin: $("#np").value }); $("#np").value = ""; m.className = "msg ok"; m.textContent = "Code enregistré."; } catch { m.textContent = "Échec."; }
+  try {
+    await call({ action: "set_pin", pin: $("#np").value, old: $("#op").value });
+    $("#np").value = ""; $("#op").value = ""; m.className = "msg ok"; m.textContent = "Code modifié."; pinState();
+  } catch (e) { m.textContent = e.message === "old" ? "L'ancien code est incorrect." : e.message === "locked" ? "Trop d'essais. Réessaie dans 15 min." : "Échec."; }
 };
 $("#back").onclick = () => { $("#l2").hidden = true; $("#lp").hidden = false; $("#lm").textContent = ""; };
 $("#go").onclick = async () => {
@@ -173,13 +194,16 @@ $("#refresh").onclick = loadAll;
 async function loadStats() {
   const s = await call({ action: "stats" });
   $("#tiles").innerHTML = [
-    [s.total, "Inscrits"], [s.confirmes, "E-mails confirmés"], [s.push, "Abonnés push"],
-    [s.dernieres_24h, "Dernières 24 h"], [s.derniers_7j, "7 derniers jours"], [s.statut.en_attente, "À examiner"],
+    [s.total, "Inscrits"], [s.confirmes, "E-mails confirmés"], [s.installes, "Appli installée"],
+    [s.push_actifs, "Notifications activées"], [s.visiteurs_14j, "Visiteurs 14 j"], [s.statut.en_attente, "À examiner"],
+    [s.dernieres_24h, "Inscrits 24 h"], [s.derniers_7j, "Inscrits 7 j"], [s.push, "Appareils push"],
   ].map(([n, l]) => `<div class="tile"><b>${n}</b><span>${l}</span></div>`).join("");
-  const max = Math.max(1, ...s.jours.map(j => j.n));
-  $("#chart").innerHTML = s.jours.map(j => `<i class="${j.n ? "" : "z"}" style="height:${Math.max(3, j.n / max * 100)}%" title="${j.d} : ${j.n}"></i>`).join("");
+  const vis = Object.fromEntries(s.visites.map(v => [v.d, v]));
+  const max = Math.max(1, ...s.jours.map(j => Math.max(j.n, vis[j.d]?.app || 0, vis[j.d]?.site || 0)));
+  const bar = (n, c, l) => `<i style="height:${n ? Math.max(4, n / max * 100) : 2}%;background:${n ? c : "#E1DCCF"}" title="${l} : ${n}"></i>`;
+  $("#chart").innerHTML = s.jours.map(j => `<div class="g" title="${j.d}">${bar(j.n, "#0E6A6A", "Inscriptions")}${bar(vis[j.d]?.app || 0, "#C8923B", "Appli")}${bar(vis[j.d]?.site || 0, "#9DB9B5", "Site")}</div>`).join("");
   $("#a0").textContent = s.jours[0].d.slice(5).split("-").reverse().join("/");
-  $("#a1").textContent = "aujourd'hui · max " + max + "/jour";
+  $("#a1").textContent = "aujourd'hui · max " + max;
   const p = s.profil, st = s.statut;
   $("#split").innerHTML = [
     ["Voyageurs", p.voyageur], ["Propriétaires", p.proprietaire], ["Les deux", p.les_deux], ["Profil non renseigné", p.non_renseigne],
@@ -195,6 +219,11 @@ async function loadList() {
   $("#cnt").textContent = "(" + j.count + ")";
   $("#list").innerHTML = j.rows.length ? j.rows.map(r => `
     <div class="item"><div class="t"><b>${esc(r.prenom)}</b><span><span class="tag ${r.statut}">${r.statut === "en_attente" ? "En attente" : r.statut === "approuve" ? "Approuvé" : "Refusé"}</span> ${r.confirmed_at ? '<span class="tag ok2">E-mail OK</span>' : ""}</span></div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px">
+        <span class="tag ${r.pwa_installed_at ? "ok2" : ""}" style="${r.pwa_installed_at ? "" : "opacity:.55"}">${r.pwa_installed_at ? "Appli installée" : "Appli non installée"}</span>
+        <span class="tag ${r.push_enabled_at ? "ok2" : ""}" style="${r.push_enabled_at ? "" : "opacity:.55"}">${r.push_enabled_at ? "Push activés" : "Push non activés"}</span>
+        ${r.last_seen_at ? `<span class="tag">Vu le ${fmt(r.last_seen_at)}</span>` : ""}
+      </div>
       <small>${esc(r.email)}</small>
       <small>${esc(PROFIL[r.profil] || "Profil non renseigné")} · inscrit le ${fmt(r.created_at)}${r.interets?.length ? " · " + esc(r.interets.join(", ")) : ""}</small>
       ${r.idee ? `<small>Idée : ${esc(r.idee)}</small>` : ""}
@@ -215,8 +244,8 @@ $("#fs").onchange = loadList;
 $("#csv").onclick = async () => {
   const j = await call({ action: "list", limit: 500 });
   const cell = v => '"' + String(v ?? "").replace(/"/g, '""').replace(/^([=+\-@])/, "'$1") + '"';
-  const head = ["prenom", "email", "profil", "statut", "email_confirme", "interets", "idee", "inscrit_le"];
-  const rows = j.rows.map(r => [r.prenom, r.email, r.profil, r.statut, r.confirmed_at ? "oui" : "non", (r.interets || []).join("|"), r.idee, r.created_at].map(cell).join(";"));
+  const head = ["prenom", "email", "profil", "statut", "email_confirme", "appli_installee", "push_actifs", "derniere_visite", "interets", "idee", "inscrit_le"];
+  const rows = j.rows.map(r => [r.prenom, r.email, r.profil, r.statut, r.confirmed_at ? "oui" : "non", r.pwa_installed_at ? "oui" : "non", r.push_enabled_at ? "oui" : "non", r.last_seen_at || "", (r.interets || []).join("|"), r.idee, r.created_at].map(cell).join(";"));
   const blob = new Blob(["﻿" + [head.join(";"), ...rows].join("\n")], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "inscrits-vacances-muslims.csv"; a.click();
 };
@@ -233,7 +262,54 @@ $("#ps").onclick = async () => {
   $("#ps").disabled = false;
 };
 
-async function loadAll() { try { await Promise.all([loadStats(), loadList()]); } catch {} }
+
+async function pinState() {
+  try { const r = await call({ action: "has_pin" }); $("#op").hidden = !r.has; $("#pinst").textContent = r.has ? "Pour changer ton code, saisis l'ancien puis le nouveau (6 à 10 chiffres)." : "6 à 10 chiffres, pour entrer sans e-mail."; $("#sp").textContent = r.has ? "Modifier" : "Enregistrer"; } catch {}
+}
+
+/* Cloche : notifications de l'admin */
+const ICON = { inscription: "#0E6A6A", confirmation: "#2E8B7A", install: "#C8923B", push: "#7A5AC8" };
+let evAll = false, evData = [];
+function ago(d) { const m = Math.round((Date.now() - new Date(d)) / 60000); return m < 1 ? "à l'instant" : m < 60 ? m + " min" : m < 1440 ? Math.round(m / 60) + " h" : fmt(d); }
+function renderEv() {
+  const rows = evAll ? evData : evData.slice(0, 8);
+  $("#evlist").innerHTML = rows.length ? rows.map(e => `<div class="ev ${e.read ? "" : "n"}"><span class="dot" style="background:${ICON[e.type] || "#0E6A6A"}"></span><div><b>${esc(e.title)}</b><small>${esc(e.detail || "")} · ${ago(e.created_at)}</small></div></div>`).join("") : '<small style="color:var(--mut)">Rien pour le moment.</small>';
+  $("#evmore").hidden = evData.length <= 8; $("#evmore").textContent = evAll ? "Réduire" : "Tout voir (" + evData.length + ")";
+}
+async function loadEv() {
+  try {
+    const j = await call({ action: "events", limit: 60 }); evData = j.events;
+    $("#bdg").hidden = !j.unread; $("#bdg").textContent = j.unread > 99 ? "99+" : j.unread;
+    renderEv();
+  } catch {}
+}
+$("#bell").onclick = () => { const c = $("#evcard"); c.hidden = !c.hidden; if (!c.hidden) loadEv(); };
+$("#evmore").onclick = () => { evAll = !evAll; renderEv(); };
+$("#evread").onclick = async () => { try { await call({ action: "events_read" }); loadEv(); } catch {} };
+
+/* Notifications push de l'admin sur cet appareil */
+const b64 = s => { const p = (s + "=".repeat((4 - s.length % 4) % 4)).replace(/-/g, "+").replace(/_/g, "/"); return Uint8Array.from(atob(p), c => c.charCodeAt(0)); };
+async function apState() {
+  const ok = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  if (!ok) { $("#apst").textContent = "Ce navigateur ne gère pas les notifications (sur iPhone, installe d'abord l'appli)."; $("#apbtn").hidden = true; return; }
+  const reg = await navigator.serviceWorker.getRegistration("/"); const sub = reg && await reg.pushManager.getSubscription();
+  if (sub && Notification.permission === "granted") { $("#apst").textContent = "Activées sur cet appareil ✓"; $("#apbtn").textContent = "Réactiver"; }
+}
+$("#apbtn").onclick = async () => {
+  const m = $("#apm"); m.className = "msg"; m.textContent = "";
+  try {
+    if ((await Notification.requestPermission()) !== "granted") { m.textContent = "Notifications refusées."; return; }
+    const reg = await navigator.serviceWorker.register("/sw.js"); await navigator.serviceWorker.ready;
+    const k = await call({ action: "vapid" }); if (!k.public_key) throw 0;
+    const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(k.public_key) });
+    const j = sub.toJSON();
+    await call({ action: "admin_push_subscribe", endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth });
+    m.className = "msg ok"; m.textContent = "C'est activé : tu seras alerté à chaque nouvelle inscription."; apState();
+  } catch { m.textContent = "Impossible d'activer."; }
+};
+
+async function loadAll() { try { localStorage.setItem("vm_isadmin", "1"); } catch {} await Promise.all([loadStats(), loadList(), loadEv(), pinState(), apState()].map(p => p.catch(() => {}))); }
+setInterval(() => { if (tok && !document.hidden) loadEv(); }, 60000);
 if (tok) { show(true); loadAll(); }
 </script>
 </body>
