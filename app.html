@@ -60,6 +60,8 @@ p{margin:0;font-size:14px;line-height:1.5;color:var(--muted)}
 <script>['gesturestart','gesturechange','gestureend'].forEach(function(e){document.addEventListener(e,function(x){x.preventDefault()})});document.addEventListener('touchmove',function(e){if(e.touches.length>1)e.preventDefault()},{passive:false});var _t=0;document.addEventListener('touchend',function(e){var n=Date.now();if(n-_t<350)e.preventDefault();_t=n},{passive:false});</script>
 </head>
 <body>
+<a id="vm-admin-tmp" href="/admin.html" style="position:fixed;top:max(10px,env(safe-area-inset-top));right:10px;z-index:60;background:#C8923B;color:#241705;font:700 12px/1 Inter,system-ui,sans-serif;padding:7px 11px;border-radius:99px;text-decoration:none;box-shadow:0 6px 16px -6px rgba(0,0,0,.5)">Admin</a>
+<!-- TEMPORAIRE : à retirer -->
 <div class="brand"><img src="assets/icon-192.png" alt="" width="34" height="34">Vacances <span>Muslims</span></div>
 <main class="wrap">
 
