@@ -66,6 +66,14 @@ a{color:inherit}
 .inst b{font-size:14px;color:#5a3d00}.inst small{color:#6a5a2a;font-size:12.5px}
 .inst-btn{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;font-size:14px;color:#2A1A00;background:linear-gradient(180deg,var(--gold-light),var(--gold));cursor:pointer}
 .inst-btn[hidden]{display:none}
+.live{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.dot-live{position:relative;flex:none;width:10px;height:10px;border-radius:50%;background:#2ECC71;box-shadow:0 0 0 0 rgba(46,204,113,.7);animation:livepulse 1.6s infinite}
+.dot-live::after{content:"";position:absolute;inset:0;border-radius:50%;background:#2ECC71;animation:blink 1.6s infinite}
+@keyframes livepulse{0%{box-shadow:0 0 0 0 rgba(46,204,113,.65)}70%{box-shadow:0 0 0 10px rgba(46,204,113,0)}100%{box-shadow:0 0 0 0 rgba(46,204,113,0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.members{display:flex;align-items:center;gap:10px;margin-top:14px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#fff;font-size:13.5px}
+.members b{color:var(--gold-light)}.members small{display:block;color:var(--teal-200);font-size:12px;font-weight:400}
+@media(prefers-reduced-motion:reduce){.dot-live,.dot-live::after{animation:none}}
 .proof{display:flex;align-items:center;gap:10px}
 .av{width:34px;height:34px;border-radius:32%;object-fit:cover;flex:none;border:2px solid rgba(231,189,112,.6)}
 .story{display:flex;align-items:center;gap:18px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px}
@@ -396,7 +404,7 @@ dialog p{font-size:14px;color:#3D4A47;margin-bottom:18px}
           <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E7BD70" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Sans engagement</span>
           <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E7BD70" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Ouverture annoncée par e-mail</span>
         </div>
-        <p class="proof"><img class="av" src="assets/communaute-sm.jpg" alt="" width="34" height="34">Née d'une communauté de plus de 120 000 membres.</p>
+        <div class="members"><img class="av" src="assets/communaute-sm.jpg" alt="" width="34" height="34"><span><span class="live"><i class="dot-live" aria-hidden="true"></i><span><b>139 000+</b> membres</span></span><small>Née de la communauté Vacances Musulmanes, très active chaque jour.</small></span></div>
       </div>
 
       <div class="stage" id="stage" aria-hidden="true">
@@ -594,7 +602,7 @@ dialog p{font-size:14px;color:#3D4A47;margin-bottom:18px}
       <img src="assets/communaute.jpg" alt="Le sourire du groupe Vacances Musulmanes" width="92" height="92" loading="lazy">
       <div>
         <h2>Tout est parti d'un groupe</h2>
-        <p>Vacances Musulmanes, c'est d'abord une communauté de plus de 120 000 membres qui se partagent des maisons avec piscine, sans vis-à-vis. Cette plateforme est née pour leur offrir un cadre plus simple, plus sûr et plus serein.</p>
+        <p>Vacances Musulmanes, c'est d'abord une communauté de plus de 139 000 membres, active chaque jour, qui se partage des maisons avec piscine, sans vis-à-vis. Cette plateforme est née pour leur offrir un cadre plus simple, plus sûr et plus serein.</p>
         <p style="margin-top:8px"><a href="https://www.facebook.com/share/g/1QHomWRmg5/" target="_blank" rel="noopener" style="color:var(--teal-700);font-weight:600">Rejoindre le groupe Facebook →</a></p>
       </div>
     </div>
