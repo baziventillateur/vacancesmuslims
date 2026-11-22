@@ -29,7 +29,14 @@ Deno.serve(async (req) => {
 
   const { data: row } = await db.from("waitlist")
     .select("id, prenom, profil, confirmed_at").eq("confirm_token", token).maybeSingle();
-  if (!row || !row.confirmed_at) return json({ error: "token" }, 404);
+  if (!row) return json({ error: "token" }, 404);
+
+  // Le lien de l'e-mail ouvre la page ; c'est elle qui confirme (un scanner de liens ne confirme donc rien).
+  if (b.action === "confirm") {
+    if (!row.confirmed_at) await db.from("waitlist").update({ confirmed_at: new Date().toISOString() }).eq("id", row.id);
+    return json({ status: "ok", prenom: row.prenom, profil: row.profil });
+  }
+  if (!row.confirmed_at) return json({ error: "token" }, 404);
 
   if (b.action === "get") return json({ prenom: row.prenom, profil: row.profil });
 

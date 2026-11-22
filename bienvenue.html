@@ -6,6 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Bienvenue — Vacances Muslims</title>
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<link rel="manifest" href="assets/manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="theme-color" content="#0B3D3D">
 <style>
@@ -46,6 +47,15 @@ label.chk{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(-
 label.chk input{margin-top:2px;accent-color:var(--teal-700)}
 .big{width:56px;height:56px;border-radius:50%;background:#EAF4F2;display:grid;place-items:center;margin:2px auto 12px}
 .center{text-align:center}
+.bell{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:grid;place-items:center;font-size:30px;margin:2px auto 12px;animation:wig 2.5s ease-in-out infinite;transform-origin:50% 10%}
+@keyframes wig{0%,60%,100%{transform:rotate(0)}65%{transform:rotate(14deg)}70%{transform:rotate(-12deg)}75%{transform:rotate(8deg)}80%{transform:rotate(-4deg)}}
+.how{counter-reset:h;display:grid;gap:8px;margin:0 0 14px;padding:0;list-style:none}
+.how li{counter-increment:h;display:flex;gap:10px;align-items:flex-start;background:var(--sand);border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.4}
+.how li::before{content:counter(h);flex:none;width:22px;height:22px;border-radius:50%;background:var(--teal-700);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+[hidden]{display:none!important}
+.msg{color:#9A3B1E;font-size:13px;margin:8px 0 0}
+.pop{animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
 .err{color:#9A3B1E;font-size:13px;margin:8px 0 0;min-height:1em}
 </style>
 </head>
@@ -54,7 +64,7 @@ label.chk input{margin-top:2px;accent-color:var(--teal-700)}
 <main class="card" id="app">
  <div class="bar"><i id="bar"></i></div>
 
- <section class="step on" data-s="0">
+ <section class="step on" data-s="welcome">
   <div class="eyebrow">E-mail confirmé</div>
   <h1 id="hello">Bienvenue !</h1>
   <p>Ta place sur la liste d'attente est réservée. Voici en 20 secondes ce qui t'attend.</p>
@@ -63,10 +73,20 @@ label.chk input{margin-top:2px;accent-color:var(--teal-700)}
    <div class="pt"><span class="ic">🔒</span><span><b>Paiement sécurisé</b>Un acompte de 30 % protégé jusqu'à ton arrivée.</span></div>
    <div class="pt"><span class="ic">0%</span><span><b>0 % de commission Vacances Muslims</b>Pour les premiers inscrits, pendant 12 mois.</span></div>
   </div>
-  <button class="btn" data-next>Continuer</button>
+  <button class="btn" data-next id="w-next" disabled>Continuer</button>
  </section>
 
- <section class="step" data-s="1">
+ <section class="step center" data-s="notif">
+  <div class="bell">🔔</div>
+  <div class="eyebrow">Ne rate pas l'ouverture</div>
+  <h1>Active les notifications</h1>
+  <p>Sois prévenu(e) en premier dès que le site ouvre, même appli fermée. Pas de spam : uniquement l'essentiel.</p>
+  <button class="btn" id="n-on">Activer les notifications</button>
+  <div class="msg" id="n-msg" role="alert"></div>
+  <button class="link" data-next>Plus tard</button>
+ </section>
+
+ <section class="step" data-s="profil">
   <div class="eyebrow">Question 1 sur 2</div>
   <h1>Tu es plutôt…</h1>
   <p>Cela nous aide à préparer le bon accueil.</p>
@@ -79,7 +99,7 @@ label.chk input{margin-top:2px;accent-color:var(--teal-700)}
   <button class="link" data-skip>Passer</button>
  </section>
 
- <section class="step" data-s="2">
+ <section class="step" data-s="concepts">
   <div class="eyebrow">Question 2 sur 2</div>
   <h1>Des moments à partager ?</h1>
   <p>Des concepts organisés avec les propriétaires. Choisis ce que tu veux, ou rien du tout.</p>
@@ -93,61 +113,116 @@ label.chk input{margin-top:2px;accent-color:var(--teal-700)}
   </div>
   <input type="text" id="idee" maxlength="200" placeholder="Une autre idée ? Ex. : sortie entre pères et fils">
   <label class="chk" id="own" hidden><input type="checkbox" id="accueil"><span>Ma maison pourrait accueillir des concepts.</span></label>
-  <button class="btn" id="fin">Terminer</button>
+  <button class="btn" id="fin">Continuer</button>
   <div class="err" id="err" role="alert"></div>
  </section>
 
- <section class="step center" data-s="3">
-  <div class="big"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0E6A6A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+ <section class="step center" data-s="install">
+  <div class="big pop"><img src="assets/icon-192.png" alt="" width="40" height="40" style="border-radius:10px"></div>
+  <div class="eyebrow">Dernière étape</div>
+  <h1>Installe l'application</h1>
+  <p>Un accès direct depuis ton écran d'accueil, et ta place sur la liste toujours à portée de main.</p>
+  <button class="btn" id="i-btn" hidden>Installer l'application</button>
+  <ol class="how" id="i-ios" hidden style="text-align:left">
+   <li><span>Touche le bouton <b>Partager</b> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E6A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg> en bas de Safari.</span></li>
+   <li><span>Choisis <b>« Sur l'écran d'accueil »</b>.</span></li>
+   <li><span>Ouvre l'appli : tu pourras y activer les notifications.</span></li>
+  </ol>
+  <ol class="how" id="i-other" hidden style="text-align:left">
+   <li><span>Ouvre le menu de ton navigateur (⋮ ou Partager).</span></li>
+   <li><span>Choisis <b>« Installer l'application »</b> ou <b>« Ajouter à l'écran d'accueil »</b>.</span></li>
+  </ol>
+  <button class="link" data-next id="i-skip">Plus tard</button>
+ </section>
+
+ <section class="step center" data-s="done">
+  <div class="big pop"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0E6A6A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
   <h1 id="bye">C'est noté !</h1>
   <p>Nous examinons ton inscription et revenons vers toi d'ici quelques jours. Tu seras prévenu(e) de la date d'ouverture, en même temps que toute la communauté.</p>
+  <a class="btn" id="open" style="display:block;text-decoration:none" href="app.html">Voir ma place sur la liste</a>
+ </section>
+
+ <section class="step center" data-s="invalid">
+  <h1>Lien invalide</h1>
+  <p>Ce lien n'est plus valable. Inscris-toi à nouveau pour recevoir un nouveau lien.</p>
   <a class="btn" style="display:block;text-decoration:none" href="./">Retour au site</a>
  </section>
 </main>
 
+<script src="assets/pwa.js"></script>
 <script>
 const API = "https://fvrcgagumwkjfqctdfhs.supabase.co/functions/v1/onboarding";
 const token = new URLSearchParams(location.search).get("t") || "";
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
-let profil = "", step = 0;
+let profil = "", order = ["welcome", "profil", "concepts", "done"], pos = 0;
 const call = body => fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, ...body }) }).then(r => r.json());
-const go = n => {
-  step = n;
-  $$(".step").forEach(s => s.classList.toggle("on", +s.dataset.s === n));
-  $("#bar").style.width = (n + 1) * 25 + "%";
+const show = name => {
+  $$(".step").forEach(s => s.classList.toggle("on", s.dataset.s === name));
+  const i = order.indexOf(name);
+  $("#bar").style.width = i < 0 ? "100%" : Math.round((i + 1) / order.length * 100) + "%";
   scrollTo({ top: 0, behavior: "smooth" });
 };
-call({ action: "get" }).then(r => {
-  if (r.prenom) {
-    $("#hello").textContent = "Bienvenue, " + r.prenom + " !";
-    $("#bye").textContent = "C'est noté, " + r.prenom + " !";
-  }
-}).catch(() => {});
-$("[data-next]").onclick = () => go(1);
+const next = () => { pos = Math.min(pos + 1, order.length - 1); show(order[pos]); };
+
+async function init() {
+  if (!token) return show("invalid");
+  let r;
+  try { r = await call({ action: "confirm" }); } catch { r = {}; }
+  if (r.status !== "ok") return show("invalid");
+  VM.saveToken(token);
+  $("#open").href = "app.html?t=" + token;
+  if (r.prenom) { $("#hello").textContent = "Bienvenue, " + r.prenom + " !"; $("#bye").textContent = "C'est noté, " + r.prenom + " !"; }
+  // Étapes selon l'appareil : notifications d'abord si possible, installation à la fin.
+  const st = await VM.pushState();
+  order = ["welcome"];
+  if (st === "off") order.push("notif");
+  order.push("profil", "concepts");
+  if (!VM.standalone()) order.push("install");
+  order.push("done");
+  pos = 0; $("#w-next").disabled = false; show("welcome");
+}
+$$("[data-next]").forEach(b => b.onclick = next);
+
+$("#n-on").onclick = async () => {
+  const b = $("#n-on"); b.disabled = true; $("#n-msg").textContent = "";
+  try { await VM.enablePush(token); b.textContent = "✓ Notifications activées"; setTimeout(next, 700); }
+  catch (e) { $("#n-msg").textContent = e.message === "denied" ? "Notifications refusées : tu pourras les activer plus tard dans l'appli." : "Impossible pour le moment. Tu pourras réessayer dans l'appli."; b.disabled = false; }
+};
+
 $$("#profils .choice").forEach(b => b.onclick = () => {
   profil = b.dataset.v;
   $$("#profils .choice").forEach(x => x.setAttribute("aria-pressed", x === b));
   $("#p-next").disabled = false;
 });
-const toStep2 = () => { $("#own").hidden = !(profil === "proprietaire" || profil === "les_deux"); go(2); };
-$("#p-next").onclick = () => { call({ profil }).catch(() => {}); toStep2(); };
-$("[data-skip]").onclick = toStep2;
+const toConcepts = () => { $("#own").hidden = !(profil === "proprietaire" || profil === "les_deux"); next(); };
+$("#p-next").onclick = () => { call({ profil }).catch(() => {}); toConcepts(); };
+$("[data-skip]").onclick = toConcepts;
 const chips = $$("#chips .chip");
-chips.forEach(c => c.onclick = () => { c.setAttribute("aria-pressed", c.getAttribute("aria-pressed") !== "true"); sync(); });
 const sync = () => { $("#all").textContent = chips.every(c => c.getAttribute("aria-pressed") === "true") ? "Tout désélectionner" : "Tout sélectionner"; };
+chips.forEach(c => c.onclick = () => { c.setAttribute("aria-pressed", c.getAttribute("aria-pressed") !== "true"); sync(); });
 $("#all").onclick = () => { const on = !chips.every(c => c.getAttribute("aria-pressed") === "true"); chips.forEach(c => c.setAttribute("aria-pressed", on)); sync(); };
 $("#fin").onclick = async () => {
   const b = $("#fin"); b.disabled = true; $("#err").textContent = "";
   try {
-    const r = await call({
-      interets: chips.filter(c => c.getAttribute("aria-pressed") === "true").map(c => c.dataset.v),
-      idee: $("#idee").value, accueil: !$("#own").hidden && $("#accueil").checked
-    });
+    const r = await call({ interets: chips.filter(c => c.getAttribute("aria-pressed") === "true").map(c => c.dataset.v), idee: $("#idee").value, accueil: !$("#own").hidden && $("#accueil").checked });
     if (r.status !== "ok") throw 0;
-    go(3);
+    next();
   } catch (e) { $("#err").textContent = "Une erreur est survenue. Réessaie dans un instant."; b.disabled = false; }
 };
-if (!token) go(3);
+
+// Installation : bouton natif si le navigateur le propose, sinon mode d'emploi.
+const ib = $("#i-btn");
+const refreshInstall = () => {
+  const can = VM.canPrompt();
+  ib.hidden = !can;
+  $("#i-ios").hidden = can || !VM.ios();
+  $("#i-other").hidden = can || VM.ios();
+};
+document.addEventListener("vm-install-ready", refreshInstall);
+document.addEventListener("vm-installed", () => { ib.hidden = true; $("#i-skip").textContent = "Continuer"; $("#i-ios").hidden = $("#i-other").hidden = true; setTimeout(next, 600); });
+ib.onclick = async () => { if (await VM.install()) { $("#i-skip").textContent = "Continuer"; setTimeout(next, 600); } };
+refreshInstall();
+init();
 </script>
 </body>
 </html>

@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
     token = data.confirm_token;
   }
 
-  const lien = `${SUPABASE_URL}/functions/v1/confirmer?token=${token}`;
+  const lien = `${SITE_URL}/bienvenue.html?t=${token}`;
   const lang = LANGS.includes(String(b.lang ?? "")) ? String(b.lang) : "fr";
   const tpl = await template(lang);
   const html = tpl ? tpl.replaceAll("{{prenom}}", esc(prenom)).replaceAll("{{lien}}", lien) : emailHtml(prenom, lien);

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Vacances Muslims</title>
+<link rel="manifest" href="assets/manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="theme-color" content="#0B3D3D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+*{box-sizing:border-box}
+:root{--teal-900:#0B3D3D;--teal-700:#0E6A6A;--gold:#C8923B;--gold-light:#E7BD70;--sand:#F7F4EE;--ink:#1D2B2B;--muted:#55625F}
+html,body{margin:0;min-height:100%}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:#082C2C radial-gradient(900px 600px at 15% 0%,#14807F 0%,#0B3D3D 45%,#041E1F 100%) fixed;display:flex;flex-direction:column;align-items:center;padding:max(16px,env(safe-area-inset-top)) 14px max(20px,env(safe-area-inset-bottom))}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:17px;margin:4px 0 16px}
+.brand img{width:34px;height:34px;border-radius:10px}.brand span{color:var(--gold-light)}
+.wrap{width:100%;max-width:440px;display:grid;gap:12px}
+.card{background:#fff;border-radius:20px;padding:18px;box-shadow:0 18px 40px rgba(0,0,0,.4);animation:in .5s ease both}
+.card:nth-child(2){animation-delay:.08s}.card:nth-child(3){animation-delay:.16s}.card:nth-child(4){animation-delay:.24s}
+@keyframes in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.hero{text-align:center;padding-top:22px}
+.badge{position:relative;width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:#EAF4F2;display:grid;place-items:center}
+.badge::before,.badge::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--teal-700);opacity:0;animation:ring 2.4s ease-out infinite}
+.badge::after{animation-delay:1.2s}
+@keyframes ring{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.9);opacity:0}}
+.badge svg path{stroke-dasharray:30;stroke-dashoffset:30;animation:draw .8s .3s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+h1{font-size:22px;line-height:1.2;margin:0 0 6px;color:#082C2C}
+h2{font-size:15px;margin:0 0 4px}
+p{margin:0;font-size:14px;line-height:1.5;color:var(--muted)}
+.tl{display:grid;gap:0;margin:4px 0 0}
+.tl div{display:flex;gap:12px;align-items:flex-start;position:relative;padding:0 0 14px}
+.tl div:last-child{padding-bottom:0}
+.tl div::before{content:"";position:absolute;left:11px;top:24px;bottom:0;width:2px;background:#E1DCCF}
+.tl div:last-child::before{display:none}
+.dot{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:#EAF4F2;color:var(--teal-700)}
+.dot.todo{background:#F4EFE2;color:#8A7A4A}
+.dot.now{background:var(--gold-light);color:#2A1A00;animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(231,189,112,.6)}50%{box-shadow:0 0 0 7px rgba(231,189,112,0)}}
+.tl b{display:block;font-size:14px}.tl small{color:var(--muted);font-size:12.5px}
+.row{display:flex;gap:12px;align-items:center}
+.bell{flex:none;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:grid;place-items:center;font-size:20px}
+.bell.ring{animation:wig 2.5s ease-in-out infinite;transform-origin:50% 10%}
+@keyframes wig{0%,60%,100%{transform:rotate(0)}65%{transform:rotate(14deg)}70%{transform:rotate(-12deg)}75%{transform:rotate(8deg)}80%{transform:rotate(-4deg)}}
+.btn{width:100%;margin-top:12px;border:0;border-radius:12px;padding:12px 16px;font:inherit;font-size:15px;font-weight:700;color:#2A1A00;background:linear-gradient(180deg,var(--gold-light),var(--gold));box-shadow:0 8px 18px rgba(200,146,59,.35);cursor:pointer;text-decoration:none;display:block;text-align:center}
+.btn.alt{background:#fff;color:var(--teal-700);border:1.5px solid #CFE3DF;box-shadow:none}
+.ok{color:var(--teal-700);font-weight:700;font-size:13.5px;margin-top:10px}
+.msg{font-size:12.5px;color:#9A3B1E;margin-top:8px}
+.foot{margin-top:6px;text-align:center;font-size:12px}.foot a{color:#B7D6D2;margin:0 8px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="brand"><img src="assets/icon-192.png" alt="" width="34" height="34">Vacances <span>Muslims</span></div>
+<main class="wrap">
+
+ <section class="card hero">
+  <div class="badge"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0E6A6A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+  <h1 id="hello">Tu es sur la liste d'attente</h1>
+  <p>Ta place est réservée. On te prévient ici, et par e-mail, dès l'ouverture du site.</p>
+ </section>
+
+ <section class="card">
+  <div class="tl">
+   <div><span class="dot">✓</span><span><b>Inscription</b><small>Ton prénom et ton e-mail sont enregistrés.</small></span></div>
+   <div><span class="dot" id="d-mail">✓</span><span><b>E-mail confirmé</b><small id="s-mail">Ton adresse est confirmée.</small></span></div>
+   <div><span class="dot now">3</span><span><b>Examen de ton inscription</b><small>Nous revenons vers toi d'ici quelques jours.</small></span></div>
+   <div><span class="dot todo">4</span><span><b>Ouverture du site</b><small>0 % de commission Vacances Muslims pendant 12 mois pour les premiers inscrits.</small></span></div>
+  </div>
+ </section>
+
+ <section class="card" id="notif">
+  <div class="row"><div class="bell" id="bell">🔔</div><div><h2>Notifications</h2><p id="n-txt">Sois prévenu(e) en premier dès l'ouverture, même appli fermée.</p></div></div>
+  <button class="btn" id="n-btn">Activer les notifications</button>
+  <div class="ok" id="n-ok" hidden>✓ Notifications activées</div>
+  <div class="msg" id="n-msg" hidden></div>
+ </section>
+
+ <section class="card">
+  <h2>Invite tes proches</h2>
+  <p>Plus on est nombreux, plus vite le site ouvre.</p>
+  <button class="btn alt" id="share">Partager Vacances Muslims</button>
+  <a class="btn alt" style="margin-top:8px" href="https://www.facebook.com/share/g/1QHomWRmg5/" target="_blank" rel="noopener">Rejoindre le groupe Facebook</a>
+ </section>
+
+ <div class="foot"><a href="cgu.html">CGU</a><a href="confidentialite.html">Confidentialité</a><a href="support.html">Support</a></div>
+</main>
+
+<script src="assets/pwa.js"></script>
+<script>
+const API = "https://fvrcgagumwkjfqctdfhs.supabase.co/functions/v1/";
+const $ = s => document.querySelector(s);
+const q = new URLSearchParams(location.search).get("t");
+if (q) VM.saveToken(q);
+const token = VM.token();
+if (token) {
+  fetch(API + "onboarding", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, action: "get" }) })
+    .then(r => r.json()).then(r => { if (r.prenom) $("#hello").textContent = "Tu es sur la liste, " + r.prenom + " !"; }).catch(() => {});
+} else {
+  $("#s-mail").textContent = "Ouvre le lien de ton e-mail pour confirmer ton adresse.";
+  $("#d-mail").className = "dot now"; $("#d-mail").textContent = "2";
+}
+
+const nb = $("#n-btn"), nt = $("#n-txt"), nok = $("#n-ok"), nm = $("#n-msg");
+async function refresh() {
+  const st = await VM.pushState();
+  nok.hidden = st !== "on"; nb.hidden = st === "on" || st === "denied" || st === "unsupported";
+  $("#bell").classList.toggle("ring", st === "off");
+  if (st === "unsupported") {
+    nt.textContent = VM.ios() && !VM.standalone()
+      ? "Sur iPhone, installe d'abord l'appli : bouton Partager puis « Sur l'écran d'accueil », puis ouvre-la."
+      : "Ton navigateur ne gère pas les notifications. Nous t'enverrons un e-mail.";
+  } else if (st === "denied") {
+    nt.textContent = "Les notifications sont bloquées. Autorise-les dans les réglages de ton navigateur ou de ton téléphone.";
+  } else if (st === "on") { nt.textContent = "Tu seras prévenu(e) dès l'ouverture."; }
+}
+nb.onclick = async () => {
+  nb.disabled = true; nm.hidden = true;
+  try { await VM.enablePush(token); } catch (e) { nm.textContent = e.message === "denied" ? "Notifications refusées." : "Impossible pour le moment. Réessaie plus tard."; nm.hidden = false; }
+  nb.disabled = false; refresh();
+};
+refresh();
+
+$("#share").onclick = async () => {
+  const data = { title: "Vacances Muslims", text: "Des maisons privées, sans vis-à-vis, pour des vacances sereines. Rejoins la liste d'attente :", url: "https://vacancesmuslims.fr" };
+  try { if (navigator.share) await navigator.share(data); else { await navigator.clipboard.writeText(data.url); $("#share").textContent = "Lien copié ✓"; } } catch {}
+};
+</script>
+</body>
+</html>

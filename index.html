@@ -13,6 +13,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="assets/manifest.webmanifest">
+<script>if(matchMedia("(display-mode: standalone)").matches||navigator.standalone===true){location.replace("app.html")}</script>
 <meta property="og:image" content="https://vacancesmuslims.fr/assets/og.png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -61,6 +62,10 @@ a{color:inherit}
 .hero-form{margin-top:24px;max-width:480px}
 .micro{margin-top:12px;font-size:12px;color:var(--teal-200);display:flex;gap:14px;flex-wrap:wrap}
 .micro span{display:inline-flex;align-items:center;gap:6px}
+.inst{margin-top:14px;padding:12px;border-radius:12px;background:var(--gold-soft);text-align:center;display:grid;gap:8px}
+.inst b{font-size:14px;color:#5a3d00}.inst small{color:#6a5a2a;font-size:12.5px}
+.inst-btn{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;font-size:14px;color:#2A1A00;background:linear-gradient(180deg,var(--gold-light),var(--gold));cursor:pointer}
+.inst-btn[hidden]{display:none}
 .proof{display:flex;align-items:center;gap:10px}
 .av{width:34px;height:34px;border-radius:32%;object-fit:cover;flex:none;border:2px solid rgba(231,189,112,.6)}
 .story{display:flex;align-items:center;gap:18px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px}
@@ -663,6 +668,7 @@ dialog p{font-size:14px;color:#3D4A47;margin-bottom:18px}
   </div>
 </template>
 
+<script src="assets/pwa.js"></script>
 <script>
 /* ==========================================================
    CONFIGURATION
@@ -739,7 +745,22 @@ function showDone(slot, p, status) {
     t.textContent = "Nous venons d'envoyer un e-mail à " + p.email + ". Clique sur le lien pour confirmer ton adresse : tu pourras ensuite découvrir le projet.";
     s.textContent = "Tu ne le vois pas ? Pense à regarder dans tes courriers indésirables.";
   }
-  wrap.append(tick, h, t, s); box.appendChild(wrap);
+  wrap.append(tick, h, t, s);
+  if (status !== "deja_confirme" && window.VM && !VM.standalone()) {
+    const ins = document.createElement("div"); ins.className = "inst";
+    const ib = document.createElement("button"); ib.type = "button"; ib.className = "inst-btn";
+    const hint = document.createElement("small");
+    const paint = () => {
+      if (VM.canPrompt()) { ib.hidden = false; ib.textContent = "Installer l'application"; hint.textContent = "Le lien de l'e-mail s'ouvrira directement dans l'appli."; }
+      else if (VM.ios()) { ib.hidden = true; hint.textContent = "Pour installer l'appli : Partager, puis « Sur l'écran d'accueil »."; }
+      else { ib.hidden = true; hint.textContent = "Pour installer l'appli : menu du navigateur, puis « Installer l'application »."; }
+    };
+    ib.onclick = async () => { if (await VM.install()) { ib.hidden = true; hint.textContent = "Appli installée, merci ! Ouvre maintenant ton e-mail."; } };
+    document.addEventListener("vm-install-ready", paint); paint();
+    const lab = document.createElement("b"); lab.textContent = "📱 Installe l'application";
+    ins.append(lab, ib, hint); wrap.append(ins);
+  }
+  box.appendChild(wrap);
   slot.replaceChildren(box);
   slot.scrollIntoView({ behavior: "smooth", block: "center" });
 }
