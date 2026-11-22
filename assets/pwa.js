@@ -73,6 +73,29 @@
     document.body.appendChild(a);
   };
   document.addEventListener("DOMContentLoaded", VM.adminButton);
+  // Origine de la visite (première visite conservée) : ?src=… / ?utm_source=… sinon le site de provenance
+  VM.source = () => {
+    try {
+      let s = localStorage.getItem("vm_src");
+      if (s) return s;
+      const q = new URLSearchParams(location.search);
+      s = (q.get("src") || q.get("utm_source") || "").toLowerCase().replace(/[^a-z0-9_.\-]/g, "").slice(0, 40);
+      if (!s) {
+        let h = ""; try { h = new URL(document.referrer).hostname.replace(/^www\./, ""); } catch {}
+        if (!h || h === location.hostname) s = "direct";
+        else if (/(^|\.)(facebook\.com|fb\.me|fb\.com)$/.test(h)) s = "facebook";
+        else if (/instagram\.com$/.test(h)) s = "instagram";
+        else if (/(whatsapp\.com|wa\.me)$/.test(h)) s = "whatsapp";
+        else if (/google\./.test(h)) s = "google";
+        else if (/(t\.co|twitter\.com|x\.com)$/.test(h)) s = "x";
+        else if (/(tiktok\.com)$/.test(h)) s = "tiktok";
+        else if (/(snapchat\.com)$/.test(h)) s = "snapchat";
+        else s = h.slice(0, 40);
+      }
+      localStorage.setItem("vm_src", s); return s;
+    } catch { return ""; }
+  };
+
   // Suivi des visites (un visiteur compté une fois par jour et par page) — l'admin n'est pas compté
   addEventListener("load", () => {
     try {
@@ -81,7 +104,7 @@
       if (!v) { v = crypto.randomUUID(); localStorage.setItem("vm_vid", v); }
       const page = /app\.html$/.test(location.pathname) ? "app" : "site";
       const t = new URLSearchParams(location.search).get("t") || VM.token();
-      post("push", { action: "hit", visitor: v, page, standalone: VM.standalone(), token: t || "" });
+      post("push", { action: "hit", visitor: v, page, standalone: VM.standalone(), token: t || "", source: VM.source() });
     } catch {}
   });
 })();

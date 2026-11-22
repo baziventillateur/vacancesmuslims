@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
     if (visitor.length < 8) return json({ error: "invalid" }, 400);
     const standalone = b.standalone === true;
     const w = await byToken(String(b.token ?? ""));
-    await db.from("visits").upsert({ visitor, page, standalone, waitlist_id: w?.id ?? null }, { onConflict: "day,visitor,page", ignoreDuplicates: true });
+    await db.from("visits").upsert({ visitor, page, standalone, waitlist_id: w?.id ?? null, source: String(b.source ?? "").replace(/[^a-z0-9_.\-]/gi, "").toLowerCase().slice(0, 40) || null }, { onConflict: "day,visitor,page", ignoreDuplicates: true });
     if (w) {
       const patch: Record<string, unknown> = { last_seen_at: new Date().toISOString() };
       if (standalone && !w.pwa_installed_at) patch.pwa_installed_at = new Date().toISOString();

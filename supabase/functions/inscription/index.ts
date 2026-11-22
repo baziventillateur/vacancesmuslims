@@ -92,11 +92,11 @@ Deno.serve(async (req) => {
     await db.from("waitlist").update({ prenom }).eq("id", existing.id);
   } else {
     const { data, error } = await db
-      .from("waitlist").insert({ email, prenom, consentement: true })
+      .from("waitlist").insert({ email, prenom, consentement: true, source: String(b.source ?? "").replace(/[^a-z0-9_.\-]/gi, "").toLowerCase().slice(0, 40) || null })
       .select("confirm_token").single();
     if (error || !data) return json({ error: "db" }, 500);
     token = data.confirm_token;
-    await notifyAdmins("Nouvelle inscription", `${prenom} vient de s'inscrire`);
+    await notifyAdmins("Nouvelle inscription", `${prenom} vient de s'inscrire${b.source ? " (" + String(b.source).replace(/[^a-z0-9_.\-]/gi, "").slice(0, 40) + ")" : ""}`);
   }
 
   const lien = `${SITE_URL}/bienvenue.html?t=${token}`;

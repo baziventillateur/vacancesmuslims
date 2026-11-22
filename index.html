@@ -719,6 +719,7 @@ $$("[data-form-slot]").forEach(slot => {
     const p = {
       prenom: String(d.get("prenom") || "").trim(),
       email: String(d.get("email") || "").trim().toLowerCase(),
+      source: window.VM ? VM.source() : "",
       consent: !!d.get("consent"),
       website: String(d.get("hp_champ") || "")
     };

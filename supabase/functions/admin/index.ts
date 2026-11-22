@@ -153,6 +153,46 @@ Deno.serve(async (req) => {
     return json({ status: "ok" });
   }
 
+
+  // Relances par e-mail (une seule fois par personne et par type)
+  if (action === "relance_count" || action === "relance_send") {
+    const type = b.type === "sans_appli" ? "sans_appli" : "non_confirmes";
+    const limitDate = new Date(Date.now() - 24 * 3600_000).toISOString();
+    let q = db.from("waitlist").select("id,prenom,email,confirm_token").lt("created_at", limitDate);
+    q = type === "non_confirmes"
+      ? q.is("confirmed_at", null).is("relance_confirm_at", null)
+      : q.not("confirmed_at", "is", null).is("pwa_installed_at", null).is("relance_install_at", null);
+    const { data: rows } = await q.limit(500);
+    const list = rows ?? [];
+    if (action === "relance_count") return json({ count: list.length });
+    const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+    const mk = (r: { prenom: string; email: string; confirm_token: string }) => {
+      const lien = `${SITE_URL}/bienvenue.html?t=${r.confirm_token}`;
+      const titre = type === "non_confirmes" ? `${esc(r.prenom)}, confirme ton adresse pour garder ta place` : `${esc(r.prenom)}, installe l'appli pour être prévenu(e) en premier`;
+      const texte = type === "non_confirmes"
+        ? "Tu t'es inscrit(e) sur la liste d'attente Vacances Muslims, mais ton adresse n'est pas encore confirmée. Un clic suffit pour valider ta place."
+        : "Ta place est réservée. Installe l'appli sur ton téléphone et active les notifications : tu seras prévenu(e) dès l'ouverture du site, même appli fermée.";
+      const bouton = type === "non_confirmes" ? "Confirmer mon adresse" : "Installer l'appli";
+      return {
+        from: FROM, to: [r.email], subject: type === "non_confirmes" ? "Plus qu'un clic pour garder ta place — Vacances Muslims" : "Sois prévenu(e) en premier — Vacances Muslims",
+        html: `<div style="font-family:Arial,sans-serif;background:#F7F4EE;padding:24px"><div style="max-width:480px;margin:auto;background:#fff;border-radius:14px;padding:28px;color:#1D2B2B"><p style="margin:0 0 4px;font-weight:700;color:#0E6A6A">Vacances Muslims</p><h1 style="font-size:21px;margin:8px 0 12px">${titre}</h1><p style="font-size:15px;line-height:1.5;margin:0 0 20px">${texte}</p><p style="margin:0 0 20px"><a href="${lien}" style="display:inline-block;background:#0E6A6A;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:10px">${bouton}</a></p><p style="font-size:12px;color:#55625F;margin:0">0 % de commission pendant le lancement. Si tu ne souhaites plus être sur la liste, ignore simplement cet e-mail.</p></div></div>`,
+      };
+    };
+    let sent = 0;
+    for (let i = 0; i < list.length; i += 100) {
+      const chunk = list.slice(i, i + 100);
+      const r = await fetch("https://api.resend.com/emails/batch", {
+        method: "POST", headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify(chunk.map(mk)),
+      }).catch(() => null);
+      if (r && r.ok) {
+        sent += chunk.length;
+        await db.from("waitlist").update({ [type === "non_confirmes" ? "relance_confirm_at" : "relance_install_at"]: new Date().toISOString() }).in("id", chunk.map((x) => x.id));
+      } else console.error("relance batch", r?.status, r ? await r.text() : "no response");
+    }
+    return json({ status: "ok", sent, total: list.length });
+  }
+
   if (action === "logout") {
     const t = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
     await delSet("admin_sess_" + await sha(t));
@@ -175,16 +215,23 @@ Deno.serve(async (req) => {
     }
     const { count: push } = await db.from("push_subscriptions").select("id", { count: "exact", head: true }).eq("is_admin", false);
     const since = new Date(now - 14 * 86400000).toISOString().slice(0, 10);
-    const { data: vis } = await db.from("visits").select("day,page,visitor").gte("day", since).limit(20000);
+    const { data: vis } = await db.from("visits").select("day,page,visitor,source").gte("day", since).limit(20000);
     const vday: Record<string, { site: number; app: number }> = {};
     for (const d of Object.keys(days)) vday[d] = { site: 0, app: 0 };
     const vv = new Set<string>();
-    for (const v of vis ?? []) { const d = String(v.day); if (vday[d]) vday[d][v.page as "site" | "app"]++; vv.add(v.visitor); }
-    const { data: fx } = await db.from("waitlist").select("pwa_installed_at,push_enabled_at");
+    const srcV: Record<string, Set<string>> = {};
+    for (const v of vis ?? []) {
+      const d = String(v.day); if (vday[d]) vday[d][v.page as "site" | "app"]++; vv.add(v.visitor);
+      const k = v.source || "inconnu"; (srcV[k] ??= new Set()).add(v.visitor);
+    }
+    const { data: fx } = await db.from("waitlist").select("pwa_installed_at,push_enabled_at,source,confirmed_at");
+    const srcI: Record<string, number> = {};
+    for (const x of fx ?? []) { const k = (x as { source?: string }).source || "inconnu"; srcI[k] = (srcI[k] ?? 0) + 1; }
     const installes = (fx ?? []).filter((x) => x.pwa_installed_at).length;
     const pushOn = (fx ?? []).filter((x) => x.push_enabled_at).length;
     return json({
       installes, push_actifs: pushOn, visiteurs_14j: vv.size,
+      sources: [...new Set([...Object.keys(srcV), ...Object.keys(srcI)])].map((k) => ({ source: k, visiteurs: srcV[k]?.size ?? 0, inscrits: srcI[k] ?? 0 })).sort((a, b) => b.visiteurs + b.inscrits - a.visiteurs - a.inscrits),
       visites: Object.entries(vday).map(([d, v]) => ({ d, site: v.site, app: v.app })),
       total: r.length,
       confirmes: r.filter((x) => x.confirmed_at).length,
@@ -200,7 +247,7 @@ Deno.serve(async (req) => {
     const q = String(b.q ?? "").trim().replace(/[%,()]/g, "");
     const limit = Math.min(Number(b.limit) || 8, 500);
     let query = db.from("waitlist")
-      .select("id,prenom,email,profil,statut,interets,idee,accueille_concepts,confirmed_at,created_at,pwa_installed_at,push_enabled_at,last_seen_at", { count: "exact" })
+      .select("id,prenom,email,profil,statut,interets,idee,accueille_concepts,confirmed_at,created_at,pwa_installed_at,push_enabled_at,last_seen_at,source", { count: "exact" })
       .order("created_at", { ascending: false }).range(0, limit - 1);
     if (q) query = query.or(`prenom.ilike.%${q}%,email.ilike.%${q}%`);
     if (b.statut && ["en_attente", "approuve", "refuse"].includes(String(b.statut))) query = query.eq("statut", String(b.statut));

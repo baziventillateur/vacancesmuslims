@@ -95,6 +95,18 @@ input,select,textarea{font:inherit;width:100%;border:1px solid #D6D1C3;border-ra
       <div class="lg"><span><i style="background:#0E6A6A"></i>Inscriptions</span><span><i style="background:#C8923B"></i>Visiteurs de l'appli</span><span><i style="background:#9DB9B5"></i>Visiteurs du site</span></div>
       <div class="chart3" id="chart"></div><div class="axis"><span id="a0"></span><span id="a1"></span></div></div>
 
+    <div class="card"><h2>Parcours des inscrits</h2><div id="funnel"></div></div>
+
+    <div class="card"><h2>D'où viennent-ils ? <small style="font-weight:500;color:var(--mut)">(14 jours)</small></h2><div id="srcs"></div>
+      <small style="color:var(--mut);display:block;margin-top:6px">Astuce : ajoute <b>?src=fb-annonce</b> à ton lien (ex. vacancesmuslims.fr/?src=fb-annonce) pour suivre une publication précise.</small></div>
+
+    <div class="card"><h2>Relancer</h2>
+      <small style="color:var(--mut)">Un e-mail, une seule fois par personne, aux inscrits d'il y a plus de 24 h.</small>
+      <div class="row" style="margin-top:8px"><span id="rc1" style="flex:1">…</span><button class="sm" id="rb1" disabled>Relancer</button></div>
+      <div class="row"><span id="rc2" style="flex:1">…</span><button class="sm" id="rb2" disabled>Relancer</button></div>
+      <div class="msg" id="rm"></div>
+    </div>
+
     <div class="card"><h2>Répartition</h2><div class="split" id="split"></div></div>
 
     <div class="card">
@@ -205,6 +217,14 @@ async function loadStats() {
   $("#a0").textContent = s.jours[0].d.slice(5).split("-").reverse().join("/");
   $("#a1").textContent = "aujourd'hui · max " + max;
   const p = s.profil, st = s.statut;
+  const fun = [["Inscrits", s.total], ["E-mail confirmé", s.confirmes], ["Appli installée", s.installes], ["Notifications activées", s.push_actifs]];
+  $("#funnel").innerHTML = fun.map(([l, n], i) => {
+    const pct = s.total ? Math.round(n / s.total * 100) : 0, prev = i ? fun[i - 1][1] : 0;
+    const loss = i && prev ? Math.round((1 - n / prev) * 100) : null;
+    return `<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12.5px"><b>${l}</b><span>${n} · ${pct}%${loss !== null ? ` <span style="color:#B3261E">(−${loss}%)</span>` : ""}</span></div><div style="height:9px;background:#EEE9DA;border-radius:6px;overflow:hidden"><i style="display:block;height:100%;width:${Math.max(pct, n ? 2 : 0)}%;background:#0E6A6A"></i></div></div>`;
+  }).join("");
+  const smax = Math.max(1, ...s.sources.map(x => Math.max(x.visiteurs, x.inscrits)));
+  $("#srcs").innerHTML = s.sources.length ? s.sources.slice(0, 8).map(x => `<div style="margin-bottom:7px"><div style="display:flex;justify-content:space-between;font-size:12.5px"><b>${esc(x.source)}</b><span>${x.visiteurs} visiteurs · ${x.inscrits} inscrits</span></div><div style="height:7px;background:#EEE9DA;border-radius:6px;overflow:hidden"><i style="display:block;height:100%;width:${x.visiteurs / smax * 100}%;background:#9DB9B5"></i></div></div>`).join("") : '<small style="color:var(--mut)">Pas encore de données : ça se remplit avec les prochaines visites.</small>';
   $("#split").innerHTML = [
     ["Voyageurs", p.voyageur], ["Propriétaires", p.proprietaire], ["Les deux", p.les_deux], ["Profil non renseigné", p.non_renseigne],
     ["Approuvés", st.approuve], ["Refusés", st.refuse], ["Concepts OK", s.concepts],
@@ -222,6 +242,7 @@ async function loadList() {
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px">
         <span class="tag ${r.pwa_installed_at ? "ok2" : ""}" style="${r.pwa_installed_at ? "" : "opacity:.55"}">${r.pwa_installed_at ? "Appli installée" : "Appli non installée"}</span>
         <span class="tag ${r.push_enabled_at ? "ok2" : ""}" style="${r.push_enabled_at ? "" : "opacity:.55"}">${r.push_enabled_at ? "Push activés" : "Push non activés"}</span>
+        ${r.source ? `<span class="tag">via ${esc(r.source)}</span>` : ""}
         ${r.last_seen_at ? `<span class="tag">Vu le ${fmt(r.last_seen_at)}</span>` : ""}
       </div>
       <small>${esc(r.email)}</small>
@@ -244,8 +265,8 @@ $("#fs").onchange = loadList;
 $("#csv").onclick = async () => {
   const j = await call({ action: "list", limit: 500 });
   const cell = v => '"' + String(v ?? "").replace(/"/g, '""').replace(/^([=+\-@])/, "'$1") + '"';
-  const head = ["prenom", "email", "profil", "statut", "email_confirme", "appli_installee", "push_actifs", "derniere_visite", "interets", "idee", "inscrit_le"];
-  const rows = j.rows.map(r => [r.prenom, r.email, r.profil, r.statut, r.confirmed_at ? "oui" : "non", r.pwa_installed_at ? "oui" : "non", r.push_enabled_at ? "oui" : "non", r.last_seen_at || "", (r.interets || []).join("|"), r.idee, r.created_at].map(cell).join(";"));
+  const head = ["prenom", "email", "profil", "statut", "email_confirme", "appli_installee", "push_actifs", "derniere_visite", "source", "interets", "idee", "inscrit_le"];
+  const rows = j.rows.map(r => [r.prenom, r.email, r.profil, r.statut, r.confirmed_at ? "oui" : "non", r.pwa_installed_at ? "oui" : "non", r.push_enabled_at ? "oui" : "non", r.last_seen_at || "", r.source || "", (r.interets || []).join("|"), r.idee, r.created_at].map(cell).join(";"));
   const blob = new Blob(["﻿" + [head.join(";"), ...rows].join("\n")], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "inscrits-vacances-muslims.csv"; a.click();
 };
@@ -308,7 +329,22 @@ $("#apbtn").onclick = async () => {
   } catch { m.textContent = "Impossible d'activer."; }
 };
 
-async function loadAll() { try { localStorage.setItem("vm_isadmin", "1"); } catch {} await Promise.all([loadStats(), loadList(), loadEv(), pinState(), apState()].map(p => p.catch(() => {}))); }
+async function relCounts() {
+  for (const [n, t, label] of [[1, "non_confirmes", "inscrits n'ayant pas confirmé leur e-mail"], [2, "sans_appli", "confirmés sans appli installée"]]) {
+    try { const r = await call({ action: "relance_count", type: t }); $("#rc" + n).textContent = r.count + " " + label; $("#rb" + n).disabled = !r.count; $("#rb" + n).dataset.n = r.count; } catch {}
+  }
+}
+for (const [n, t] of [[1, "non_confirmes"], [2, "sans_appli"]]) {
+  $("#rb" + n).onclick = async () => {
+    const m = $("#rm"); m.className = "msg"; m.textContent = "";
+    if (!confirm("Envoyer l'e-mail de relance à " + $("#rb" + n).dataset.n + " personne(s) ?")) return;
+    $("#rb" + n).disabled = true;
+    try { const r = await call({ action: "relance_send", type: t }); m.className = "msg ok"; m.textContent = r.sent + " e-mail(s) envoyé(s)."; } catch { m.textContent = "Échec de l'envoi."; }
+    relCounts();
+  };
+}
+
+async function loadAll() { try { localStorage.setItem("vm_isadmin", "1"); } catch {} await Promise.all([loadStats(), loadList(), loadEv(), pinState(), apState(), relCounts()].map(p => p.catch(() => {}))); }
 setInterval(() => { if (tok && !document.hidden) loadEv(); }, 60000);
 if (tok) { show(true); loadAll(); }
 </script>
