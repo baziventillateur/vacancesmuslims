@@ -121,7 +121,7 @@ $("#send").onclick = async () => {
   $("#lm").className = "msg"; $("#lm").textContent = "";
   const email = $("#em").value.trim(); if (!email) return;
   $("#send").disabled = true;
-  try { await call({ action: "request", email }); $("#l1").hidden = true; $("#l2").hidden = false; $("#lm").className = "msg ok"; $("#lm").textContent = "Si cet e-mail est autorisé, un code vient d'être envoyé."; $("#code").focus(); }
+  try { const rq = await call({ action: "request", email }); if (rq.mail === false) { $("#lm").textContent = "L'e-mail n'a pas pu partir (service d'envoi)."; $("#send").disabled = false; return; } $("#l1").hidden = true; $("#l2").hidden = false; $("#lm").className = "msg ok"; $("#lm").textContent = "Si cet e-mail est autorisé, un code vient d'être envoyé."; $("#code").focus(); }
   catch { $("#lm").textContent = "Impossible pour le moment."; }
   $("#send").disabled = false;
 };

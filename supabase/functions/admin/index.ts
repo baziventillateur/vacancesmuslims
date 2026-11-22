@@ -7,7 +7,7 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY")!;
 const SITE_URL = (Deno.env.get("SITE_URL") || "https://vacancesmuslims.fr").replace(/\/$/, "");
 const FROM = Deno.env.get("FROM_EMAIL") ?? "Vacances Muslims <inscription@vacancesmuslims.fr>";
-const ADMIN_EMAIL = (Deno.env.get("ADMIN_EMAIL") || "baziventilateur@gmail.com").toLowerCase();
+const ADMIN_EMAIL = (Deno.env.get("ADMIN_EMAIL") || "baziventillateur@gmail.com").toLowerCase();
 const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
 const cors = {
@@ -49,22 +49,24 @@ Deno.serve(async (req) => {
   // 1) Demande de code
   if (action === "request") {
     const email = String(b.email ?? "").trim().toLowerCase();
+    let mail = true;
     if (email === ADMIN_EMAIL) {
       const cur = JSON.parse(await getSet("admin_otp") ?? "null") as { at: number } | null;
       if (!cur || Date.now() - cur.at > 30_000) {
         const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1_000_000).padStart(6, "0");
         await setSet("admin_otp", JSON.stringify({ hash: await sha(code), exp: Date.now() + 10 * 60_000, tries: 0, at: Date.now() }));
-        await fetch("https://api.resend.com/emails", {
+        const rr = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             from: FROM, to: [ADMIN_EMAIL], subject: `Code admin Vacances Muslims : ${code}`,
             html: `<p style="font:16px Arial">Ton code de connexion admin :</p><p style="font:700 34px Arial;letter-spacing:6px">${code}</p><p style="font:13px Arial;color:#666">Valable 10 minutes. Si ce n'est pas toi, ignore ce message.</p>`,
           }),
-        }).catch(() => {});
+        }).catch((e) => { console.error("resend fetch", String(e)); return null; });
+        if (!rr || !rr.ok) { mail = false; console.error("resend", rr?.status, rr ? await rr.text() : "no response"); }
       }
     }
-    return json({ status: "ok" }); // même réponse dans tous les cas
+    return json({ status: "ok", mail });
   }
 
   // 2) Vérification du code → session de 12 h
