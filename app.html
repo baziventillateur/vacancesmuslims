@@ -89,6 +89,14 @@ p{margin:0;font-size:14px;line-height:1.5;color:var(--muted)}
   <h2>Invite tes proches</h2>
   <p>Plus on est nombreux, plus vite le site ouvre.</p>
   <button class="btn alt" id="share">Partager Vacances Muslims</button>
+  <div id="invwrap" hidden style="margin-top:14px;padding-top:14px;border-top:1px solid #E1DCCF">
+   <h2>Invite par e-mail</h2>
+   <p>Ils recevront une seule invitation de ta part. Maximum 5 adresses à la fois.</p>
+   <div id="inv" style="margin-top:8px"></div>
+   <button class="btn alt" id="inv-add" type="button" style="margin-top:0">+ Ajouter un e-mail</button>
+   <button class="btn" id="inv-send" type="button">Envoyer les invitations</button>
+   <div class="msg" id="inv-msg" role="alert" hidden></div>
+  </div>
   <a class="btn alt" style="margin-top:8px" href="https://www.facebook.com/share/g/1QHomWRmg5/" target="_blank" rel="noopener">Rejoindre le groupe Facebook</a>
  </section>
 
@@ -144,6 +152,24 @@ $("#share").onclick = async () => {
   const data = { title: "Vacances Muslims", text: "Des maisons privées, sans vis-à-vis, pour des vacances sereines. Rejoins la liste d'attente :", url: "https://vacancesmuslims.fr" };
   try { if (navigator.share) { await navigator.share(data); confetti(); } else { await navigator.clipboard.writeText(data.url); $("#share").textContent = "Lien copié ✓"; confetti(); } } catch {}
 };
+
+if (token) {
+  $("#invwrap").hidden = false;
+  const box = $("#inv");
+  const add = () => { if (box.children.length >= 5) return; const i = document.createElement("input"); i.type = "email"; i.placeholder = "prenom@exemple.fr"; i.autocomplete = "off"; i.style.cssText = "width:100%;border:1.5px solid #E1DCCF;border-radius:12px;padding:11px 12px;font:inherit;margin:0 0 8px"; box.appendChild(i); if (box.children.length >= 5) $("#inv-add").hidden = true; };
+  add(); add(); $("#inv-add").onclick = add;
+  $("#inv-send").onclick = async () => {
+    const emails = [...box.querySelectorAll("input")].map(i => i.value.trim()).filter(Boolean), m = $("#inv-msg"), b = $("#inv-send");
+    m.hidden = true; if (!emails.length) { m.textContent = "Saisis au moins une adresse."; m.hidden = false; return; }
+    b.disabled = true;
+    try {
+      const r = await fetch(API + "invite", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, emails }) }).then(r => r.json());
+      if (r.status === "ok") { b.textContent = "✓ Invitations envoyées, merci !"; box.querySelectorAll("input").forEach(i => i.value = ""); confetti(); setTimeout(() => { b.textContent = "Envoyer les invitations"; b.disabled = false; }, 2500); return; }
+      m.textContent = r.status === "limit" ? "Tu as déjà envoyé le maximum d'invitations." : "Vérifie les adresses et réessaie."; m.hidden = false;
+    } catch { m.textContent = "Impossible pour le moment. Réessaie plus tard."; m.hidden = false; }
+    b.disabled = false;
+  };
+}
 </script>
 </body>
 </html>

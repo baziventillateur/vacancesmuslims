@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Désinscription — Vacances Muslims</title>
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;font-family:Inter,system-ui,sans-serif;background:#082C2C radial-gradient(900px 600px at 15% 0%,#14807F 0%,#0B3D3D 45%,#041E1F 100%) fixed;color:#1D2B2B}
+.c{max-width:400px;background:#fff;border-radius:20px;padding:26px 22px;text-align:center;box-shadow:0 20px 44px rgba(0,0,0,.4)}h1{font-size:21px;margin:0 0 8px;color:#082C2C}p{margin:0;font-size:14.5px;line-height:1.5;color:#55625F}a{color:#0E6A6A}</style></head>
+<body><main class="c"><h1 id="t">Un instant…</h1><p id="p"></p><p style="margin-top:14px"><a href="./">Retour au site</a></p></main>
+<script>
+const k=new URLSearchParams(location.search).get("k")||"";
+fetch("https://fvrcgagumwkjfqctdfhs.supabase.co/functions/v1/invite",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"optout",k})})
+.then(r=>r.json()).then(r=>{if(r.status==="ok"){t.textContent="C'est noté";p.textContent="Plus personne ne pourra t'envoyer d'invitation Vacances Muslims avec cette adresse."}else throw 0}).catch(()=>{t.textContent="Lien invalide";p.textContent="Écris-nous via la page Support si besoin."});
+</script></body></html>

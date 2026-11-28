@@ -141,6 +141,19 @@ label.chk input{margin-top:2px;accent-color:var(--teal-700)}
   <button class="link" data-next id="i-skip">Plus tard</button>
  </section>
 
+
+ <section class="step center" data-s="invite">
+  <div class="big pop">🤝</div>
+  <div class="eyebrow">On est une communauté</div>
+  <h1>Fais grandir le lancement</h1>
+  <p>Plus on est nombreux, plus l'ouverture sera belle. Ajoute l'e-mail de proches : ils recevront <b>une seule invitation</b> de ta part.</p>
+  <div id="inv" style="text-align:left"></div>
+  <button class="link" id="inv-add" type="button" style="margin:0 auto 12px">+ Ajouter un e-mail</button>
+  <button class="btn" id="inv-send" type="button">Envoyer les invitations</button>
+  <div class="msg" id="inv-msg" role="alert"></div>
+  <button class="link" data-next>Plus tard</button>
+ </section>
+
  <section class="step center" data-s="done">
   <div class="big pop"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0E6A6A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
   <h1 id="bye">C'est noté !</h1>
@@ -184,7 +197,7 @@ async function init() {
   if (st === "off") order.push("notif");
   order.push("profil", "concepts");
   if (!VM.standalone()) order.push("install");
-  order.push("done");
+  order.push("invite", "done");
   pos = 0; $("#w-next").disabled = false; show("welcome");
 }
 $$("[data-next]").forEach(b => b.onclick = next);
@@ -228,6 +241,23 @@ document.addEventListener("vm-install-ready", refreshInstall);
 document.addEventListener("vm-installed", () => { ib.hidden = true; $("#i-skip").textContent = "Continuer"; $("#i-ios").hidden = $("#i-other").hidden = true; setTimeout(next, 600); });
 ib.onclick = async () => { if (await VM.install()) { $("#i-skip").textContent = "Continuer"; setTimeout(next, 600); } };
 refreshInstall();
+// Invitations d'amis
+const invBox = $("#inv");
+const addField = () => { if (invBox.children.length >= 5) return; const i = document.createElement("input"); i.type = "email"; i.placeholder = "prenom@exemple.fr"; i.autocomplete = "off"; i.style.cssText = "width:100%;border:1.5px solid #E1DCCF;border-radius:12px;padding:11px 12px;font:inherit;margin:0 0 8px"; invBox.appendChild(i); if (invBox.children.length >= 5) $("#inv-add").hidden = true; };
+addField(); addField();
+$("#inv-add").onclick = addField;
+$("#inv-send").onclick = async () => {
+  const emails = [...invBox.querySelectorAll("input")].map(i => i.value.trim()).filter(Boolean);
+  const m = $("#inv-msg"); m.textContent = "";
+  if (!emails.length) return next();
+  const b = $("#inv-send"); b.disabled = true;
+  try {
+    const r = await fetch("https://fvrcgagumwkjfqctdfhs.supabase.co/functions/v1/invite", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, emails }) }).then(r => r.json());
+    if (r.status === "ok") { b.textContent = "✓ Invitations envoyées, merci !"; setTimeout(next, 900); }
+    else if (r.status === "limit") { m.textContent = "Tu as déjà envoyé le maximum d'invitations."; b.disabled = false; }
+    else throw 0;
+  } catch { m.textContent = "Vérifie les adresses ou réessaie dans un instant."; b.disabled = false; }
+};
 init();
 </script>
 </body>
