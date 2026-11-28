@@ -535,6 +535,58 @@ dialog p{font-size:14px;color:#3D4A47;margin-bottom:18px}
 <a class="winter-cta" href="#inscription">Rejoindre la liste</a>
 </div></div></section>
 
+<style>
+#ete{display:none}
+[data-saison=ete] #ete{display:block}
+[data-saison=ete] #hiver{display:none}
+.summer-svg{display:block;width:100%;height:auto;aspect-ratio:900/470}
+.winter-card.ete-card{background:#2E8FBF}
+.winter-card.ete-card .winter-txt{background:linear-gradient(180deg,rgba(8,60,70,.78),rgba(8,60,70,0))}
+.summer-svg .ray{animation:erot 40s linear infinite}
+.summer-svg .cl{animation:ecl linear infinite}
+.summer-svg .bd{transform:translate(-40px,150px);animation:ebd linear infinite}
+.summer-svg .wv{animation:ewv 4s ease-in-out infinite}
+.summer-svg .glint{animation:egl 5s ease-in-out infinite}
+.summer-svg .palm{transform-origin:0 0;animation:epa 5s ease-in-out infinite}
+@keyframes erot{to{transform:rotate(360deg)}}
+@keyframes ecl{from{transform:translateX(-160px)}to{transform:translateX(1020px)}}
+@keyframes ebd{0%{transform:translate(-40px,150px)}50%{transform:translate(480px,110px)}100%{transform:translate(960px,150px)}}
+@keyframes ewv{0%,100%{transform:translateX(0)}50%{transform:translateX(16px)}}
+@keyframes egl{0%,100%{opacity:.08;transform:translateX(0)}50%{opacity:.3;transform:translateX(380px)}}
+@keyframes epa{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
+@media (prefers-reduced-motion:reduce){.summer-svg *{animation:none!important}}
+</style>
+<!-- =============== ETE =============== -->
+<section class="winter" id="ete"><div class="wrap"><div class="winter-card ete-card rv">
+<svg class="summer-svg" viewBox="0 0 900 470" role="img" aria-label="Une maison moderne avec piscine sous le soleil" preserveAspectRatio="xMidYMid meet">
+<defs><linearGradient id="esky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E8FBF"/><stop offset=".7" stop-color="#9ADCE0"/><stop offset="1" stop-color="#FFE2A8"/></linearGradient>
+<linearGradient id="ewa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFFBF5"/><stop offset="1" stop-color="#1FB0BE"/></linearGradient>
+<linearGradient id="egr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7DBB7A"/><stop offset="1" stop-color="#4E9A5C"/></linearGradient>
+<linearGradient id="ewl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#E9DFC9"/></linearGradient>
+<filter id="esh" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#000" flood-opacity=".3"/></filter></defs>
+<rect width="900" height="470" fill="url(#esky)"/>
+<g transform="translate(760 100)"><g class="ray"><rect x="-4" y="-120" width="8" height="46" rx="4" fill="#FFF3C4" opacity=".55" transform="rotate(0)"/><rect x="-4" y="-120" width="8" height="46" rx="4" fill="#FFF3C4" opacity=".55" transform="rotate(30)"/><rect x="-4" y="-120" width="8" height="46" rx="4" fill="#FFF3C4" opacity=".55" transform="rotate(60)"/><rect x="-4" y="-120" width="8" height="46" rx="4" fill="#FFF3C4" opacity=".55" transform="rotate(90)"/><rect x="-4" y="-120" width="8" height="46" rx="4" fill="#FFF3C4" opacity=".55" transform="rotate(120)"/><rect x="-4" y="-120" width="8" height="46" rx="4" fill="#FFF3C4" opacity=".55" transform="rotate(150)"/><rect x="-4" y="-120" width="8" height="46" rx="4" fill="#FFF3C4" opacity=".55" transform="rotate(180)"/><rect x="-4" y="-120" width="8" height="46" rx="4" fill="#FFF3C4" opacity=".55" transform="rotate(210)"/><rect x="-4" y="-120" width="8" height="46" rx="4" fill="#FFF3C4" opacity=".55" transform="rotate(240)"/><rect x="-4" y="-120" width="8" height="46" rx="4" fill="#FFF3C4" opacity=".55" transform="rotate(270)"/><rect x="-4" y="-120" width="8" height="46" rx="4" fill="#FFF3C4" opacity=".55" transform="rotate(300)"/><rect x="-4" y="-120" width="8" height="46" rx="4" fill="#FFF3C4" opacity=".55" transform="rotate(330)"/></g><circle r="44" fill="#FFF3C4"/><circle r="70" fill="#FFF3C4" opacity=".25"/></g>
+<g class="cl" style="animation-duration:40s;animation-delay:-0s"><ellipse cx="120" cy="90" rx="52" ry="15" fill="#fff" opacity=".9"/><ellipse cx="146" cy="83" rx="31" ry="14" fill="#fff" opacity=".9"/></g><g class="cl" style="animation-duration:54s;animation-delay:-17s"><ellipse cx="430" cy="60" rx="40" ry="12" fill="#fff" opacity=".9"/><ellipse cx="450" cy="55" rx="24" ry="11" fill="#fff" opacity=".9"/></g><g class="cl" style="animation-duration:68s;animation-delay:-34s"><ellipse cx="620" cy="130" rx="60" ry="18" fill="#fff" opacity=".9"/><ellipse cx="650" cy="122" rx="36" ry="16" fill="#fff" opacity=".9"/></g><path class="bd" style="animation-delay:-0.0s;animation-duration:14s" d="M0 0q8 -8 16 0q8 -8 16 0" fill="none" stroke="#2A4A55" stroke-width="2" stroke-linecap="round"/><path class="bd" style="animation-delay:-2.3s;animation-duration:17s" d="M0 0q8 -8 16 0q8 -8 16 0" fill="none" stroke="#2A4A55" stroke-width="2" stroke-linecap="round"/><path class="bd" style="animation-delay:-4.6s;animation-duration:20s" d="M0 0q8 -8 16 0q8 -8 16 0" fill="none" stroke="#2A4A55" stroke-width="2" stroke-linecap="round"/>
+<path d="M0 300 Q200 255 420 290 T900 270 V470 H0z" fill="#8CC58A"/>
+<path d="M0 340 Q260 310 520 336 T900 322 V470 H0z" fill="url(#egr)"/>
+<rect x="67" y="320" width="6" height="30" fill="#6b4a2a"/><circle cx="70" cy="306" r="24" fill="#3E8B52"/><circle cx="56" cy="316" r="16" fill="#4A9A5C"/><rect x="857" y="300" width="6" height="30" fill="#6b4a2a"/><circle cx="860" cy="286" r="24" fill="#3E8B52"/><circle cx="846" cy="296" r="16" fill="#4A9A5C"/><rect x="27" y="342" width="6" height="30" fill="#6b4a2a"/><circle cx="30" cy="328" r="24" fill="#3E8B52"/><circle cx="16" cy="338" r="16" fill="#4A9A5C"/>
+<g filter="url(#esh)"><rect x="150" y="190" width="330" height="140" fill="url(#ewl)"/><rect x="126" y="172" width="378" height="24" rx="5" fill="#fff"/><rect x="470" y="230" width="150" height="100" fill="#F4EBD8"/><rect x="456" y="214" width="178" height="18" rx="5" fill="#fff"/></g>
+<rect x="176" y="214" width="110" height="84" rx="3" fill="#2A7C86"/><rect x="306" y="214" width="150" height="84" rx="3" fill="#2A7C86"/><rect x="500" y="254" width="96" height="76" rx="3" fill="#2A7C86"/>
+<rect x="176" y="214" width="110" height="18" fill="#fff" opacity=".28"/><rect x="306" y="214" width="150" height="18" fill="#fff" opacity=".28"/>
+<g filter="url(#esh)"><rect x="100" y="344" width="540" height="100" rx="30" fill="#EFE6D2"/><rect x="116" y="358" width="508" height="72" rx="22" fill="url(#ewa)"/></g>
+<g class="wv"><path d="M150 372q16 -10 32 0t32 0t32 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".6"/><path d="M230 386q16 -10 32 0t32 0t32 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".6"/><path d="M310 372q16 -10 32 0t32 0t32 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".6"/><path d="M390 386q16 -10 32 0t32 0t32 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".6"/><path d="M470 372q16 -10 32 0t32 0t32 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".6"/></g>
+<rect class="glint" x="130" y="362" width="60" height="64" rx="10" fill="#fff" opacity=".18"/>
+<g transform="translate(730 420)"><rect x="-6" y="-210" width="12" height="210" fill="#6b4a2a" transform="rotate(4)"/><g transform="translate(12 -208)"><g class="palm"><path d="M0 0q-70 -16 -104 40q52 -34 104 -24zM0 0q70 -16 104 40q-52 -34 -104 -24zM0 0q-46 -64 -92 -54q54 4 92 54zM0 0q46 -64 92 -54q-54 4 -92 54zM0 0q-6 -56 -34 -80q16 40 34 80z" fill="#2F8A4B"/></g></g></g>
+</svg>
+<div class="winter-txt"><span class="kicker" style="color:#FFE2A8">Cet été</span><h2>Pense à réserver ton été dès maintenant.</h2><p>Maisons avec piscine, sans vis-à-vis. Rejoins la liste pour être prévenu(e) dès l'ouverture, avant l'été prochain.</p></div>
+<a class="winter-cta" href="#inscription">Rejoindre la liste</a>
+</div></div></section>
+<script>
+(function(){var q=(new URLSearchParams(location.search).get("saison")||"").toLowerCase(),d=new Date(),m=d.getMonth()+1,dd=d.getDate();
+/* hiver : du 1er novembre au 15 mars ; le reste de l'annee : "reserve ton ete" */
+var hiver=m>=11||m<=2||(m===3&&dd<=15),s=(q==="ete"||q==="hiver")?q:(hiver?"hiver":"ete");
+document.documentElement.setAttribute("data-saison",s)})();
+</script>
 <!-- =============== APERÇU =============== -->
 <section id="apercu">
   <div class="wrap">
